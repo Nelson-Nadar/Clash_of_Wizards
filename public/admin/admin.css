@@ -1,0 +1,112 @@
+main {
+    max-width: 1050px;
+    margin: auto;
+    padding: clamp(20px, 4vw, 60px)
+}
+
+header,
+.head,
+.actions,
+.fields,
+.submitrow,
+.record {
+    display: flex;
+    align-items: center;
+    gap: 14px
+}
+
+header,
+.head {
+    justify-content: space-between
+}
+
+h1 {
+    font: 900 clamp(34px, 6vw, 72px)/.8 'Barlow Condensed';
+    margin: .15rem 0 2rem
+}
+
+h1 i {
+    color: var(--aqua);
+    font-style: normal
+}
+
+.panel {
+    margin: 18px 0
+}
+
+.fields {
+    align-items: stretch;
+    margin: 18px 0
+}
+
+.fields label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 7px;
+    font-weight: 700;
+    color: #ccd5f7
+}
+
+select,
+input {
+    border: 1px solid #53618f;
+    border-radius: 9px;
+    background: #080d20;
+    color: white;
+    padding: 12px
+}
+
+.score {
+    font: 900 48px 'Barlow Condensed';
+    color: var(--gold);
+    margin: 6px 0;
+    white-space: pre-line
+}
+
+.submitrow input {
+    flex: 1
+}
+
+.record {
+    padding: 12px 0;
+    border-bottom: 1px solid #2c365e
+}
+
+.record b {
+    min-width: 60px;
+    color: var(--gold)
+}
+
+.record span {
+    flex: 1
+}
+
+.record small {
+    color: var(--muted)
+}
+
+dialog {
+    color: #f7f8ff;
+    background: #151b38;
+    border: 1px solid #53618f;
+    border-radius: 15px;
+    max-width: 360px
+}
+
+.actions {
+    flex-wrap: wrap
+}
+
+@media(max-width:620px) {
+
+    .fields,
+    .submitrow {
+        flex-direction: column
+    }
+
+    .head {
+        align-items: flex-start;
+        flex-direction: column
+    }
+}

@@ -1,0 +1,66 @@
+body {
+    overflow: hidden;
+    background: #fff
+}
+
+#game {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: #fff
+}
+
+#hud {
+    position: fixed;
+    inset: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    padding: clamp(15px, 3vw, 42px);
+    pointer-events: none;
+    color: #0b1736;
+    text-shadow: 0 2px 5px #00000018
+}
+
+#hud div {
+    display: flex;
+    flex-direction: column
+}
+
+#hud small {
+    font-weight: 700;
+    letter-spacing: .13em;
+    color: #2457a6;
+    font-size: clamp(9px, 1vw, 15px)
+}
+
+#hud b {
+    font: 900 clamp(24px, 3vw, 55px)/1 'Barlow Condensed';
+    letter-spacing: .03em
+}
+
+#lives {
+    color: #5b2a86
+}
+
+#splash {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    background: #fffffff2;
+    backdrop-filter: blur(3px)
+}
+
+#splash h1 {
+    font: 900 clamp(42px, 9vw, 130px)/.85 'Barlow Condensed';
+    margin: .15em 0;
+    text-transform: uppercase;
+    color: #0b1736;
+    text-shadow: 0 0 24px #69f5dc44
+}
+
+#splash p {
+    font-size: clamp(16px, 2vw, 28px);
+    color: #2457a6
+}

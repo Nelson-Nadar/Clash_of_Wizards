@@ -1,0 +1,1 @@
+export function segmentCircle(a, b, c, r) { const dx = b.x - a.x, dy = b.y - a.y, l = dx * dx + dy * dy; if (!l) return Math.hypot(a.x - c.x, a.y - c.y) <= r; let t = ((c.x - a.x) * dx + (c.y - a.y) * dy) / l; t = Math.max(0, Math.min(1, t)); return Math.hypot(a.x + dx * t - c.x, a.y + dy * t - c.y) <= r }

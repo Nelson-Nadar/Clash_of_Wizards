@@ -1,0 +1,41 @@
+{
+  "leaderboard": [
+    {
+      "id": "muvj0rvreqy8v",
+      "name": "Nelson",
+      "score": 2650,
+      "difficulty": "medium",
+      "duration": 180,
+      "bombsHit": 3,
+      "createdAt": "2026-10-05T17:31:20.487Z"
+    },
+    {
+      "id": "muvjb7vwsf33z",
+      "name": "Unmesh",
+      "score": 7900,
+      "difficulty": "medium",
+      "duration": 120,
+      "bombsHit": 0,
+      "createdAt": "2026-10-05T17:39:27.788Z"
+    }
+  ],
+  "highScore": 7900,
+  "calibration": [
+    {
+      "x": 103.32000000000001,
+      "y": 39.2
+    },
+    {
+      "x": 634.68,
+      "y": 39.2
+    },
+    {
+      "x": 634.68,
+      "y": 240.79999999999998
+    },
+    {
+      "x": 103.32000000000001,
+      "y": 240.79999999999998
+    }
+  ]
+}

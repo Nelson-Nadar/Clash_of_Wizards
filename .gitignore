@@ -1,0 +1,5 @@
+node_modules/
+certs/*.pem
+certs/*.key
+.env
+npm-debug.log*

@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Laser Fruit Slash Admin</title>
+    <link rel="stylesheet" href="/shared.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+    <main>
+        <header>
+            <div>
+                <div class="eyebrow">Event operator console</div>
+                <h1>LASER FRUIT <i>SLASH</i></h1>
+            </div>
+            <div id="connection" class="status">● Controller checking…</div>
+        </header>
+        <section class="panel" id="control">
+            <div class="eyebrow">Game control</div>
+            <div class="fields"><label>Difficulty<select id="difficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select></label><label>Round duration<select id="duration">
+                        <option value="120">120 seconds</option>
+                        <option value="150" selected>150 seconds</option>
+                        <option value="180">180 seconds</option>
+                    </select></label></div>
+            <p class="status" id="phase">Ready to configure a round.</p>
+            <div class="actions"><button id="start">Start Game</button><button id="pause"
+                    class="outline hidden">Pause</button><button id="resume"
+                    class="outline hidden">Resume</button><button id="end" class="danger hidden">End
+                    Round</button><button id="reset" class="outline">Reset Game</button></div>
+        </section>
+        <section class="panel" id="submit">
+            <div class="eyebrow">Round result</div>
+            <div id="result" class="score">—</div>
+            <div class="submitrow"><input id="name" maxlength="24" placeholder="Player name"><button
+                    id="submitScore">Submit Score</button></div>
+        </section>
+        <section class="panel">
+            <div class="head">
+                <div>
+                    <div class="eyebrow">Leaderboard records</div>
+                    <p class="status">All saved scores. Deleting requires confirmation PIN.</p>
+                </div><button id="clear" class="danger">Clear all</button>
+            </div>
+            <div id="records"></div>
+        </section>
+    </main>
+    <dialog id="pinDialog">
+        <form method="dialog">
+            <h2>Confirm deletion</h2>
+            <p>Enter the organizer’s 6-digit confirmation PIN.</p><input id="pin" inputmode="numeric" pattern="[0-9]{6}"
+                maxlength="6" placeholder="••••••">
+            <div class="actions"><button value="cancel" class="outline">Cancel</button><button id="confirm"
+                    value="default" class="danger">Delete</button></div>
+        </form>
+    </dialog>
+    <script src="admin.js"></script>
+</body>
+
+</html>
