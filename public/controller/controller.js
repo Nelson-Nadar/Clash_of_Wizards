@@ -10,7 +10,6 @@ const MIN_RECT_SIZE = 80;
 let ws, points, drag = -1, calibrating = false, lastTransmission = 0, calibrationDirty = false, previousDetection = null, missedFrames = 0;
 let dragStart = null;
 const DEBUG = CONFIG.DEBUG;
-const TRACKING_GRACE_FRAMES = 5;
 
 function defaultPoints() {
   return [
@@ -305,10 +304,10 @@ function loop(timestamp) {
       }));
       lastTransmission = timestamp;
     }
-  } else if (previousDetection && missedFrames < TRACKING_GRACE_FRAMES) {
+  } else if (previousDetection && missedFrames < TRACKING.TRACKING_GRACE_FRAMES) {
     missedFrames++;
     const retained = normalize(previousDetection, points);
-    $('#tracking').textContent = `Tracking: GRACE (${missedFrames}/${TRACKING_GRACE_FRAMES})`;
+    $('#tracking').textContent = `Tracking: GRACE (${missedFrames}/${TRACKING.TRACKING_GRACE_FRAMES})`;
     context.fillStyle = '#ffd34e';
     context.beginPath();
     context.arc(previousDetection.x, previousDetection.y, 8, 0, Math.PI * 2);
@@ -326,7 +325,7 @@ function loop(timestamp) {
     }
   } else {
     previousDetection = null;
-    missedFrames = TRACKING_GRACE_FRAMES;
+    missedFrames = TRACKING.TRACKING_GRACE_FRAMES;
     $('#tracking').textContent = 'Tracking: —';
 
     if (timestamp - lastTransmission > 100) {

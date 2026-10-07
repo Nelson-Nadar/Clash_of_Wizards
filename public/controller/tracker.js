@@ -1,155 +1,92 @@
 export const TRACKING = {
   MIN_RED: 110,
+  RED_DOMINANCE: 30,
   MIN_SAT: 25,
-  MIN_VALUE: 90,
-  RED_DOMINANCE: 18,
-  OVEREXPOSED_VALUE: 220,
-  OVEREXPOSED_RED_TOLERANCE: 18,
-  MIN_LOCAL_CONTRAST: 14,
-  MIN_RED_SCORE: 0.08,
   MIN_PIXELS: 1,
   MAX_PIXELS: 700,
   SCAN_STEP: 1,
   CONTINUITY_DISTANCE: 180,
-  MIN_CONFIDENCE: .18
+  MIN_CONFIDENCE: .40,
+  TRACKING_GRACE_FRAMES: 5
 };
 
-function pixelEvidence(d, i, w, h, x, y) {
+function pixelEvidence(d, i, x, y) {
   const r = d[i], g = d[i + 1], b = d[i + 2];
   const value = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const saturation = value - min;
-  const redExcess = Math.max(0, r - Math.max(g, b));
-  const redRatio = redExcess / Math.max(1, g);
-  const redScore = Math.max(0, Math.min(1, redExcess / 110));
-  const redPurity = Math.max(0, Math.min(1, redRatio / 4));
+  const redDominance = r - Math.max(g, b);
 
-  // A saturated red/pink pixel is the normal laser case. An overexposed
-  // laser can become nearly white, so allow bright neutral pixels only when
-  // they are a strong local hotspot.
-  const saturatedRed =
-    r >= TRACKING.MIN_RED &&
-    saturation >= TRACKING.MIN_SAT &&
-    value >= TRACKING.MIN_VALUE &&
-    redExcess >= TRACKING.RED_DOMINANCE;
-
-  const neutralHotspot =
-    value >= TRACKING.OVEREXPOSED_VALUE &&
-    r + TRACKING.OVEREXPOSED_RED_TOLERANCE >= g &&
-    r + TRACKING.OVEREXPOSED_RED_TOLERANCE >= b;
-
-  const sample = (sx, sy) => {
-    const nx = Math.max(0, Math.min(w - 1, sx));
-    const ny = Math.max(0, Math.min(h - 1, sy));
-    const ni = (ny * w + nx) * 4;
-    return Math.max(d[ni], d[ni + 1], d[ni + 2]);
-  };
-
-  const neighbors = (
-    sample(x - 2, y) +
-    sample(x + 2, y) +
-    sample(x, y - 2) +
-    sample(x, y + 2)
-  ) / 4;
-  const localContrast = Math.max(0, value - neighbors);
-
-  if (!saturatedRed && !(neutralHotspot && localContrast >= TRACKING.MIN_LOCAL_CONTRAST)) {
+  if (
+    r < TRACKING.MIN_RED ||
+    redDominance < TRACKING.RED_DOMINANCE ||
+    saturation < TRACKING.MIN_SAT
+  ) {
     return null;
   }
 
   return {
     x,
     y,
-    value,
-    redScore,
-    saturation,
-    localContrast,
-    // Weight red evidence more than raw brightness so large orange areas
-    // cannot win merely by containing many bright pixels.
-    redRatio,
-    redPurity,
-    laserScore: Math.min(
-      1,
-      redScore * .45 +
-      redPurity * .25 +
-      Math.min(1, localContrast / 100) * .20 +
-      Math.min(1, saturation / 180) * .10
-    )
+    redStrength: Math.min(1, r / 255),
+    redDominance: Math.min(1, redDominance / 255)
   };
 }
 
 function candidateFrom(points) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  let brightness = 0, redScore = 0, redPurity = 0, localContrast = 0, laserScore = 0;
+  let redStrength = 0, redDominance = 0;
 
   points.forEach(point => {
-    x0 = Math.min(x0, point.x); x1 = Math.max(x1, point.x);
-    y0 = Math.min(y0, point.y); y1 = Math.max(y1, point.y);
-    brightness += point.value;
-    redScore += point.redScore;
-    redPurity += point.redPurity;
-    localContrast += point.localContrast;
-    laserScore += point.laserScore;
+    x0 = Math.min(x0, point.x);
+    x1 = Math.max(x1, point.x);
+    y0 = Math.min(y0, point.y);
+    y1 = Math.max(y1, point.y);
+    redStrength += point.redStrength;
+    redDominance += point.redDominance;
   });
 
   const width = x1 - x0 + 1;
   const height = y1 - y0 + 1;
   const area = Math.max(1, width * height);
   const compactness = Math.min(1, points.length / area);
-  const center = { x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
 
   return {
-    ...center,
+    x: (x0 + x1) / 2,
+    y: (y0 + y1) / 2,
     pixels: points.length,
     width,
     height,
     compactness,
-    brightness: brightness / points.length,
-    redScore: redScore / points.length,
-    redPurity: redPurity / points.length,
-    localContrast: localContrast / points.length,
-    laserScore: laserScore / points.length
+    redStrength: redStrength / points.length,
+    redDominance: redDominance / points.length
   };
 }
 
 function scoreCandidate(candidate, previous, maxDistance) {
-  const brightnessScore = Math.min(1, candidate.brightness / 255);
-  const compactnessScore = Math.min(1, candidate.compactness);
-  const redScore = Math.min(1, candidate.redScore);
-  const redPurity = Math.min(1, candidate.redPurity);
-  const hotspotScore = Math.min(1, candidate.localContrast / 100);
-  const laserScore = Math.min(1, candidate.laserScore);
-
-  // Prefer small laser-like regions. A large region is intentionally not
-  // rewarded for having more pixels.
-  const sizeScore = candidate.pixels <= 24
-    ? 1
-    : Math.max(0, 1 - (candidate.pixels - 24) / Math.max(1, TRACKING.MAX_PIXELS - 24));
-
   const continuityScore = previous
-    ? Math.max(0, 1 - Math.hypot(candidate.x - previous.x, candidate.y - previous.y) / maxDistance)
+    ? Math.max(
+        0,
+        1 - Math.hypot(candidate.x - previous.x, candidate.y - previous.y) / maxDistance
+      )
     : .5;
 
-  const score = previous
-    ? continuityScore * .25 +
-      laserScore * .30 +
-      redScore * .14 +
-      redPurity * .06 +
-      hotspotScore * .15 +
-      brightnessScore * .07 +
-      compactnessScore * .02 +
-      sizeScore * .01
-    : laserScore * .35 +
-      redScore * .25 +
-      hotspotScore * .18 +
-      brightnessScore * .10 +
-      compactnessScore * .07 +
-      sizeScore * .05;
+  // Keep ranking intentionally simple: strong red first, continuity second,
+  // with a small preference for compact regions.
+  const score =
+    candidate.redStrength * .50 +
+    candidate.redDominance * .25 +
+    continuityScore * .20 +
+    candidate.compactness * .05;
+
+  const redQuality = candidate.redStrength * .65 + candidate.redDominance * .25;
+  const sizeQuality = Math.min(1, candidate.pixels / 4);
+  const confidence = redQuality * .85 + sizeQuality * .15;
 
   return {
     ...candidate,
     score,
-    confidence: Math.max(0, Math.min(1, score))
+    confidence: Math.max(0, Math.min(1, confidence))
   };
 }
 
@@ -164,7 +101,7 @@ export function detect(image, w, h, quad, previous = null) {
   for (let y = minY; y <= maxY; y += TRACKING.SCAN_STEP) {
     for (let x = minX; x <= maxX; x += TRACKING.SCAN_STEP) {
       if (!inside({ x, y }, quad)) continue;
-      const evidence = pixelEvidence(d, (y * w + x) * 4, w, h, x, y);
+      const evidence = pixelEvidence(d, (y * w + x) * 4, x, y);
       if (evidence) points.push(evidence);
     }
   }
@@ -183,7 +120,8 @@ export function detect(image, w, h, quad, previous = null) {
     const key = `${point.x},${point.y}`;
     if (visited.has(key)) continue;
 
-    const queue = [point], component = [];
+    const queue = [point];
+    const component = [];
     visited.add(key);
 
     while (queue.length) {
@@ -198,7 +136,10 @@ export function detect(image, w, h, quad, previous = null) {
       }
     }
 
-    if (component.length >= TRACKING.MIN_PIXELS && component.length <= TRACKING.MAX_PIXELS) {
+    if (
+      component.length >= TRACKING.MIN_PIXELS &&
+      component.length <= TRACKING.MAX_PIXELS
+    ) {
       candidates.push(candidateFrom(component));
     }
   }
@@ -210,14 +151,9 @@ export function detect(image, w, h, quad, previous = null) {
     .sort((a, b) => b.score - a.score);
 
   const best = ranked[0];
+  const reliable = best.confidence >= TRACKING.MIN_CONFIDENCE;
 
-  // Confidence is deliberately applied here rather than only in the caller,
-  // so low-quality candidates are explicitly reported as unreliable.
-  if (best.confidence < TRACKING.MIN_CONFIDENCE) {
-    return { ...best, reliable: false, candidates: ranked };
-  }
-
-  return { ...best, reliable: true, candidates: ranked };
+  return { ...best, reliable, candidates: ranked };
 }
 
 function inside(p, q) {
