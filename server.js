@@ -18,6 +18,10 @@ const PORT = network.HTTPS_PORT;
 const DATA = path.join(__dirname, 'data', 'leaderboard.json');
 const ADMIN_PIN = process.env.ADMIN_PIN || '274913';
 let store = JSON.parse(fs.readFileSync(DATA, 'utf8'));
+function syncHighScore() {
+  store.highScore = store.leaderboard.reduce((highest, record) => Math.max(highest, Number(record.score) || 0), 0);
+}
+syncHighScore();
 let state = { phase: 'idle', score: 0, lives: 3, bombsHit: 0, duration: 150, difficulty: 'medium', timeLeft: 150, controller: false, calibration: store.calibration || null, completedResult: null };
 let clients = new Set();
 let pendingEndReason = null;
@@ -79,11 +83,14 @@ wss.on('connection', ws => {
       return;
     }
     if(msg.type==='submitScore' && role==='admin' && state.phase==='over') { const record={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:sanitizeName(msg.name),score:state.score,difficulty:state.difficulty,duration:state.duration,bombsHit:state.bombsHit,createdAt:new Date().toISOString()}; store.leaderboard.push(record); save(); broadcast(snapshot()); return; }
-    if((msg.type==='deleteRecord' || msg.type==='clearLeaderboard') && role==='admin') { if(String(msg.pin)!==ADMIN_PIN) return send(ws,{type:'error',message:'Incorrect confirmation PIN.'}); if(msg.type==='deleteRecord') store.leaderboard=store.leaderboard.filter(x=>x.id!==msg.id); else store.leaderboard=[]; save(); broadcast(snapshot()); }
+    if((msg.type==='deleteRecord' || msg.type==='clearLeaderboard') && role==='admin') { if(String(msg.pin)!==ADMIN_PIN) return send(ws,{type:'error',message:'Incorrect confirmation PIN.'}); if(msg.type==='deleteRecord') store.leaderboard=store.leaderboard.filter(x=>x.id!==msg.id); else store.leaderboard=[];
+      syncHighScore();
+      save();
+      broadcast(snapshot()); }
   });
   ws.on('close',()=>{clients.delete(ws);if(role==='controller'){state.controller=false;broadcast(snapshot());}});
 });
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Laser Fruit Slash HTTPS server running on https://${network.HOST_IP}:${PORT}`);
+  console.log(`Clash of Wizards HTTPS server running on https://${network.HOST_IP}:${PORT}`);
   console.log(`Laptop access: https://localhost:${PORT}`);
 });

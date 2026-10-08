@@ -1,8 +1,14 @@
+@font-face {
+    font-family: 'HARRYP__';
+    src: url('./HARRYP__.TTF') format('truetype');
+    font-display: swap;
+}
+
 body {
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 50% 0, #28264d, #080a14 68%);
-    color: #f2eee4;
+    background: #0B1026;
+    color: #E8DCC4;
 }
 
 main {
@@ -11,11 +17,27 @@ main {
     padding: 5vh 0;
 }
 
+.eyebrow {
+    color: #D4AF37;
+}
+
+.status {
+    color: #E8DCC4;
+}
+
 h1 {
     font: 900 clamp(52px, 10vw, 128px)/.8 'HARRYP__', 'Barlow Condensed', sans-serif;
     margin: .1em 0 .4em;
-    color: #f5e9c9;
-    text-shadow: 0 0 28px #a98cdd55, 0 3px 8px #0009;
+    color: #D4AF37;
+    text-shadow: 0 0 28px #D4AF3755, 0 3px 8px #090B18;
+}
+
+#list {
+    background: #151D3B;
+    border: 1px solid #8F7325;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 16px 50px #090B1888;
 }
 
 .row {
@@ -24,22 +46,42 @@ h1 {
     align-items: center;
     text-align: left;
     padding: clamp(12px, 2vh, 24px);
-    border-bottom: 1px solid #3d3858;
+    border-bottom: 1px solid #8F7325;
     font-size: clamp(18px, 3vw, 34px);
+    color: #E8DCC4;
+}
+
+.row:last-child {
+    border-bottom: 0;
 }
 
 .rank {
     font: 900 1.5em 'HARRYP__', 'Barlow Condensed', sans-serif;
-    color: #e2c774;
+    color: #C9A227;
 }
 
 .points {
     font-weight: 700;
-    color: #c4b3e4;
+    color: #E8DCC4;
+}
+
+.row:nth-child(1) .rank,
+.row:nth-child(1) .points {
+    color: #D4AF37;
+}
+
+.row:nth-child(2) .rank,
+.row:nth-child(2) .points {
+    color: #B8B8B8;
+}
+
+.row:nth-child(3) .rank,
+.row:nth-child(3) .points {
+    color: #A97142;
 }
 
 .footer {
-    color: #aaa5bd;
+    color: #E8DCC4;
     letter-spacing: .2em;
     font-size: .75rem;
     margin-top: 28px;

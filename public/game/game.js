@@ -19,7 +19,7 @@ starImage.src = '/assets/fruits/star-fruit.svg';
 let ws, state = { phase: 'idle', timeLeft: 150 }, objects = [], effects = [], blade = [], prev = null, score = 0, lives = 3, bombs = 0, last = performance.now(), clock = 0, nextSpawn = 0, lastReport = 0, firstRunningFrame = true, gameEnded = false, countdownTimer = null;
 
 const debug = (...details) => {
-    if (CONFIG.DEBUG) console.debug('[Laser Fruit Slash]', ...details);
+    if (CONFIG.DEBUG) console.debug('[Clash of Wizards]', ...details);
 };
 
 function socket() {

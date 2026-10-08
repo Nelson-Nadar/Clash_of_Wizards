@@ -4,6 +4,10 @@
     font-display: swap;
 }
 
+.eyebrow {
+    color: #FFD966;
+}
+
 body {
     overflow: hidden;
     background: #080a18 url('./background.jpg') center center / cover no-repeat fixed;
@@ -24,8 +28,8 @@ body {
     justify-content: space-between;
     padding: clamp(15px, 3vw, 42px);
     pointer-events: none;
-    color: #f5e9c9;
-    text-shadow: 0 2px 5px #000000aa;
+    color: #FFD966;
+    text-shadow: 0 2px 5px #090B18;
 }
 
 #hud div {
@@ -36,17 +40,27 @@ body {
 #hud small {
     font-weight: 700;
     letter-spacing: .13em;
-    color: #e3c66b;
+    color: #FFD966;
     font-size: clamp(9px, 1vw, 15px);
 }
 
 #hud b {
     font: 900 clamp(24px, 3vw, 55px)/1 'HARRYP__', 'Barlow Condensed', sans-serif;
     letter-spacing: .03em;
+    color: #FFE08A;
+    text-shadow: 0 2px 5px #090B18;
+}
+
+#time {
+    color: #8FD8FF;
 }
 
 #lives {
-    color: #d9c7ef;
+    color: #D8B4FF;
+}
+
+#high {
+    color: #FFC857;
 }
 
 #splash {
@@ -63,13 +77,13 @@ body {
     font: 900 clamp(42px, 9vw, 130px)/.85 'HARRYP__', 'Barlow Condensed', sans-serif;
     margin: .15em 0;
     text-transform: uppercase;
-    color: #f5e9c9;
-    text-shadow: 0 0 24px #b69cff66, 0 3px 8px #000000aa;
+    color: #FFD966;
+    text-shadow: 0 0 24px #FFD96666, 0 3px 8px #090B18;
 }
 
 #splash p {
     font-family: 'HARRYP__', 'Space Grotesk', sans-serif;
     font-size: clamp(16px, 2vw, 28px);
-    color: #d9c7ef;
-    text-shadow: 0 2px 5px #000000aa;
+    color: #E8DCC4;
+    text-shadow: 0 2px 5px #090B18;
 }

@@ -1,6 +1,18 @@
 body {
-    background: radial-gradient(circle at 50% 0, #27264a, #080a14 65%);
-    color: #f2eee4;
+    background: #3A0D18;
+    color: #DCC9A0;
+}
+
+.eyebrow {
+    color: #D4AF37;
+}
+
+.status {
+    color: #DCC9A0;
+}
+
+.status.on {
+    color: #1F5135;
 }
 
 main {
@@ -28,20 +40,20 @@ header,
 h1 {
     font: 900 clamp(34px, 6vw, 72px)/.8 'Barlow Condensed';
     margin: .15rem 0 2rem;
-    color: #f2eee4;
-    text-shadow: 0 2px 10px #0008;
+    color: #D4AF37;
+    text-shadow: 0 2px 10px #211B1888;
 }
 
 h1 i {
-    color: #d7b96d;
+    color: #D4AF37;
     font-style: normal;
 }
 
 .panel {
     margin: 18px 0;
-    background: rgba(17, 18, 36, .94);
-    border-color: #4b466b;
-    box-shadow: 0 16px 50px #0008;
+    background: #24151A;
+    border-color: #8F7325;
+    box-shadow: 0 16px 50px #211B1888;
 }
 
 .fields {
@@ -55,44 +67,55 @@ h1 i {
     flex-direction: column;
     gap: 7px;
     font-weight: 700;
-    color: #d9d2c2;
+    color: #DCC9A0;
 }
 
 select,
 input {
-    border: 1px solid #575273;
+    border: 1px solid #8F7325;
     border-radius: 9px;
-    background: #0b0d1b;
-    color: #f7f4ec;
+    background: #E8DCC4;
+    color: #211B18;
     padding: 12px;
 }
 
+select {
+    background: #2C191D;
+    color: #E8DCC4;
+}
+
+select:focus,
+input:focus {
+    outline: 2px solid #D4AF37;
+    outline-offset: 1px;
+}
+
 button {
-    background: #9b83c8;
-    color: #11101a;
-    box-shadow: 0 4px 0 #625080;
+    background: #5A1625;
+    color: #F0D477;
+    box-shadow: 0 4px 0 #3B2924;
 }
 
 button:active {
-    box-shadow: 0 1px 0 #625080;
+    box-shadow: 0 1px 0 #3B2924;
 }
 
 .outline {
-    background: transparent;
-    border-color: #665f82;
-    color: #e7e0d1;
+    background: #3B2924;
+    border-color: #8F7325;
+    color: #E8DCC4;
     box-shadow: none;
 }
 
 .danger {
-    background: #824b65;
-    box-shadow: 0 4px 0 #542d40;
-    color: #fff;
+    background: #7A1F2B;
+    box-shadow: 0 4px 0 #3B2924;
+    color: #F0D477;
 }
 
 .score {
     font: 900 48px 'Barlow Condensed';
-    color: #e2c774;
+    color: #D4AF37;
     margin: 6px 0;
     white-space: pre-line;
 }
@@ -103,12 +126,12 @@ button:active {
 
 .record {
     padding: 12px 0;
-    border-bottom: 1px solid #37344f;
+    border-bottom: 1px solid #8F7325;
 }
 
 .record b {
     min-width: 60px;
-    color: #e2c774;
+    color: #D4AF37;
 }
 
 .record span {
@@ -116,13 +139,13 @@ button:active {
 }
 
 .record small {
-    color: #aaa5bd;
+    color: #DCC9A0;
 }
 
 dialog {
-    color: #f2eee4;
-    background: #17182b;
-    border: 1px solid #5a5475;
+    color: #DCC9A0;
+    background: #24151A;
+    border: 1px solid #8F7325;
     border-radius: 15px;
     max-width: 360px;
 }
