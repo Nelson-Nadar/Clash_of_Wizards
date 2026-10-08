@@ -1,13 +1,20 @@
+@font-face {
+    font-family: 'HARRYP__';
+    src: url('./HARRYP__.ttf') format('truetype');
+    font-display: swap;
+}
+
 body {
     overflow: hidden;
-    background: #fff
+    background: #080a18 url('./background.jpg') center center / cover no-repeat fixed;
+    font-family: 'HARRYP__', 'Space Grotesk', sans-serif;
 }
 
 #game {
     position: fixed;
     width: 100vw;
     height: 100vh;
-    background: #fff
+    background: transparent;
 }
 
 #hud {
@@ -17,29 +24,29 @@ body {
     justify-content: space-between;
     padding: clamp(15px, 3vw, 42px);
     pointer-events: none;
-    color: #0b1736;
-    text-shadow: 0 2px 5px #00000018
+    color: #f5e9c9;
+    text-shadow: 0 2px 5px #000000aa;
 }
 
 #hud div {
     display: flex;
-    flex-direction: column
+    flex-direction: column;
 }
 
 #hud small {
     font-weight: 700;
     letter-spacing: .13em;
-    color: #2457a6;
-    font-size: clamp(9px, 1vw, 15px)
+    color: #e3c66b;
+    font-size: clamp(9px, 1vw, 15px);
 }
 
 #hud b {
-    font: 900 clamp(24px, 3vw, 55px)/1 'Barlow Condensed';
-    letter-spacing: .03em
+    font: 900 clamp(24px, 3vw, 55px)/1 'HARRYP__', 'Barlow Condensed', sans-serif;
+    letter-spacing: .03em;
 }
 
 #lives {
-    color: #5b2a86
+    color: #d9c7ef;
 }
 
 #splash {
@@ -48,19 +55,21 @@ body {
     display: grid;
     place-content: center;
     text-align: center;
-    background: #fffffff2;
-    backdrop-filter: blur(3px)
+    background: #090c1c66;
+    backdrop-filter: blur(3px);
 }
 
 #splash h1 {
-    font: 900 clamp(42px, 9vw, 130px)/.85 'Barlow Condensed';
+    font: 900 clamp(42px, 9vw, 130px)/.85 'HARRYP__', 'Barlow Condensed', sans-serif;
     margin: .15em 0;
     text-transform: uppercase;
-    color: #0b1736;
-    text-shadow: 0 0 24px #69f5dc44
+    color: #f5e9c9;
+    text-shadow: 0 0 24px #b69cff66, 0 3px 8px #000000aa;
 }
 
 #splash p {
+    font-family: 'HARRYP__', 'Space Grotesk', sans-serif;
     font-size: clamp(16px, 2vw, 28px);
-    color: #2457a6
+    color: #d9c7ef;
+    text-shadow: 0 2px 5px #000000aa;
 }

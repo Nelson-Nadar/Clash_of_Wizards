@@ -1,1 +1,46 @@
-body{display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#2c3366,#080a18 70%)}main{width:min(900px,92vw);text-align:center;padding:5vh 0}h1{font:900 clamp(52px,10vw,128px)/.8 'Barlow Condensed';margin:.1em 0 .4em;color:#fff;text-shadow:0 0 28px #69f5dc44}.row{display:grid;grid-template-columns:80px 1fr auto;align-items:center;text-align:left;padding:clamp(12px,2vh,24px);border-bottom:1px solid #3d4975;font-size:clamp(18px,3vw,34px)}.rank{font:900 1.5em 'Barlow Condensed';color:var(--gold)}.points{font-weight:700;color:var(--aqua)}.footer{color:#94a0c6;letter-spacing:.2em;font-size:.75rem;margin-top:28px}
+body {
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 50% 0, #28264d, #080a14 68%);
+    color: #f2eee4;
+}
+
+main {
+    width: min(900px, 92vw);
+    text-align: center;
+    padding: 5vh 0;
+}
+
+h1 {
+    font: 900 clamp(52px, 10vw, 128px)/.8 'HARRYP__', 'Barlow Condensed', sans-serif;
+    margin: .1em 0 .4em;
+    color: #f5e9c9;
+    text-shadow: 0 0 28px #a98cdd55, 0 3px 8px #0009;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    text-align: left;
+    padding: clamp(12px, 2vh, 24px);
+    border-bottom: 1px solid #3d3858;
+    font-size: clamp(18px, 3vw, 34px);
+}
+
+.rank {
+    font: 900 1.5em 'HARRYP__', 'Barlow Condensed', sans-serif;
+    color: #e2c774;
+}
+
+.points {
+    font-weight: 700;
+    color: #c4b3e4;
+}
+
+.footer {
+    color: #aaa5bd;
+    letter-spacing: .2em;
+    font-size: .75rem;
+    margin-top: 28px;
+}

@@ -1,7 +1,12 @@
+body {
+    background: radial-gradient(circle at 50% 0, #27264a, #080a14 65%);
+    color: #f2eee4;
+}
+
 main {
     max-width: 1050px;
     margin: auto;
-    padding: clamp(20px, 4vw, 60px)
+    padding: clamp(20px, 4vw, 60px);
 }
 
 header,
@@ -12,31 +17,36 @@ header,
 .record {
     display: flex;
     align-items: center;
-    gap: 14px
+    gap: 14px;
 }
 
 header,
 .head {
-    justify-content: space-between
+    justify-content: space-between;
 }
 
 h1 {
     font: 900 clamp(34px, 6vw, 72px)/.8 'Barlow Condensed';
-    margin: .15rem 0 2rem
+    margin: .15rem 0 2rem;
+    color: #f2eee4;
+    text-shadow: 0 2px 10px #0008;
 }
 
 h1 i {
-    color: var(--aqua);
-    font-style: normal
+    color: #d7b96d;
+    font-style: normal;
 }
 
 .panel {
-    margin: 18px 0
+    margin: 18px 0;
+    background: rgba(17, 18, 36, .94);
+    border-color: #4b466b;
+    box-shadow: 0 16px 50px #0008;
 }
 
 .fields {
     align-items: stretch;
-    margin: 18px 0
+    margin: 18px 0;
 }
 
 .fields label {
@@ -45,68 +55,90 @@ h1 i {
     flex-direction: column;
     gap: 7px;
     font-weight: 700;
-    color: #ccd5f7
+    color: #d9d2c2;
 }
 
 select,
 input {
-    border: 1px solid #53618f;
+    border: 1px solid #575273;
     border-radius: 9px;
-    background: #080d20;
-    color: white;
-    padding: 12px
+    background: #0b0d1b;
+    color: #f7f4ec;
+    padding: 12px;
+}
+
+button {
+    background: #9b83c8;
+    color: #11101a;
+    box-shadow: 0 4px 0 #625080;
+}
+
+button:active {
+    box-shadow: 0 1px 0 #625080;
+}
+
+.outline {
+    background: transparent;
+    border-color: #665f82;
+    color: #e7e0d1;
+    box-shadow: none;
+}
+
+.danger {
+    background: #824b65;
+    box-shadow: 0 4px 0 #542d40;
+    color: #fff;
 }
 
 .score {
     font: 900 48px 'Barlow Condensed';
-    color: var(--gold);
+    color: #e2c774;
     margin: 6px 0;
-    white-space: pre-line
+    white-space: pre-line;
 }
 
 .submitrow input {
-    flex: 1
+    flex: 1;
 }
 
 .record {
     padding: 12px 0;
-    border-bottom: 1px solid #2c365e
+    border-bottom: 1px solid #37344f;
 }
 
 .record b {
     min-width: 60px;
-    color: var(--gold)
+    color: #e2c774;
 }
 
 .record span {
-    flex: 1
+    flex: 1;
 }
 
 .record small {
-    color: var(--muted)
+    color: #aaa5bd;
 }
 
 dialog {
-    color: #f7f8ff;
-    background: #151b38;
-    border: 1px solid #53618f;
+    color: #f2eee4;
+    background: #17182b;
+    border: 1px solid #5a5475;
     border-radius: 15px;
-    max-width: 360px
+    max-width: 360px;
 }
 
 .actions {
-    flex-wrap: wrap
+    flex-wrap: wrap;
 }
 
 @media(max-width:620px) {
-
     .fields,
     .submitrow {
-        flex-direction: column
+        flex-direction: column;
     }
 
     .head {
         align-items: flex-start;
-        flex-direction: column
+        flex-direction: column;
     }
 }
