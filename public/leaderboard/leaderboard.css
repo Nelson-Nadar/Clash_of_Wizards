@@ -7,8 +7,21 @@
 body {
     display: grid;
     place-items: center;
+    position: relative;
+    isolation: isolate;
     background: #10152A;
     color: #F1E8D5;
+}
+
+/* Semi-transparent backdrop image; keep the page content above it. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url("./backdrop.jpg") center center / cover no-repeat;
+    opacity: 0.82;
 }
 
 main {
@@ -257,7 +270,7 @@ h1 {
 }
 .rank-1 .object-image { filter: drop-shadow(0 0 12px #D8B65D55) drop-shadow(0 7px 10px #000B); }
 .player-card {
-    --monument-height: clamp(190px, 23vw, 270px);
+    --monument-height: clamp(152px, 18.4vw, 216px);
     isolation: isolate;
     overflow: visible;
     min-height: var(--monument-height);
@@ -340,7 +353,7 @@ h1 {
     padding: 0 4px;
 }
 .rank-1 .player-card {
-    --monument-height: clamp(260px, 30vw, 350px);
+    --monument-height: clamp(208px, 24vw, 280px);
     background:
         linear-gradient(90deg, #080A0D 0%, transparent 8%, #FFFFFF09 12%, transparent 21%, transparent 79%, #FFFFFF09 89%, #080A0D 100%),
         repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 12px),
@@ -360,7 +373,7 @@ h1 {
 .rank-1 .player-name { font-size: clamp(17px, 2.55vw, 29px); }
 .rank-1 .player-score { color: #F0D48A; text-shadow: 0 0 10px #D8B65D55, 0 2px 4px #000; }
 .rank-2 .player-card {
-    --monument-height: clamp(220px, 25.5vw, 298px);
+    --monument-height: clamp(176px, 20.4vw, 238px);
     background:
         linear-gradient(90deg, #080A0D 0%, transparent 8%, #FFFFFF09 12%, transparent 21%, transparent 79%, #FFFFFF09 89%, #080A0D 100%),
         repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 13px),
@@ -371,7 +384,7 @@ h1 {
 }
 .rank-2 .player-score { color: #D5DDE3; text-shadow: 0 0 8px #BFC7CE33, 0 2px 4px #000; }
 .rank-3 .player-card {
-    --monument-height: clamp(190px, 21.5vw, 252px);
+    --monument-height: clamp(152px, 17.2vw, 202px);
     background:
         linear-gradient(90deg, #080A0D 0%, transparent 8%, #FFFFFF07 12%, transparent 21%, transparent 79%, #FFFFFF07 89%, #080A0D 100%),
         repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 14px),
@@ -386,12 +399,12 @@ h1 {
     .top-three { gap: 6px; padding-top: 10px; }
     .rank-label { letter-spacing: .025em; margin-bottom: 7px; }
     .player-card {
-        --monument-height: clamp(150px, 43vw, 205px);
+        --monument-height: clamp(120px, 34.4vw, 164px);
         padding: 0 4px 15px;
     }
-    .rank-1 .player-card { --monument-height: clamp(205px, 57vw, 265px); }
-    .rank-2 .player-card { --monument-height: clamp(178px, 49vw, 230px); }
-    .rank-3 .player-card { --monument-height: clamp(150px, 43vw, 205px); }
+    .rank-1 .player-card { --monument-height: clamp(164px, 45.6vw, 212px); }
+    .rank-2 .player-card { --monument-height: clamp(142px, 39.2vw, 184px); }
+    .rank-3 .player-card { --monument-height: clamp(120px, 34.4vw, 164px); }
     .player-card::after { inset: 10px 7px 8px; }
     .player-card::before { left: -3px; right: -3px; }
     .rank-1 .player-card::before { left: -4px; right: -4px; }
@@ -401,4 +414,95 @@ h1 {
 }
 @media (prefers-reduced-motion: reduce) {
     .podium-entry, .player-card { transition: none !important; }
+}
+
+
+/* Requested artifact sizing: Resurrection Stone -10%, Invisibility Cloak +20%. */
+.rank-2 .object-image {
+    width: min(90%, 135px);
+    height: clamp(66.6px, 10.8vw, 117px);
+}
+.rank-3 .object-image {
+    width: min(120%, 180px);
+    height: clamp(88.8px, 14.4vw, 156px);
+}
+
+
+/* === Enchanted display cubes for the podium artifacts === */
+.podium-entry {
+    --artifact-cube-accent: #D8B65D;
+}
+
+.podium-entry.rank-1 { --artifact-cube-accent: #E6C766; }
+.podium-entry.rank-2 { --artifact-cube-accent: #C6D2DD; }
+.podium-entry.rank-3 { --artifact-cube-accent: #C58A5C; }
+
+/* The image itself becomes a framed, jewel-like display case. */
+.object-image {
+    box-sizing: border-box;
+    width: min(100%, 150px);
+    height: clamp(100px, 13vw, 150px);
+    padding: 12px;
+    margin: 0 auto 12px;
+    border: 2px solid var(--artifact-cube-accent);
+    outline: 1px solid color-mix(in srgb, var(--artifact-cube-accent) 48%, transparent);
+    outline-offset: 4px;
+    background:
+        linear-gradient(145deg, #FFFFFF12, transparent 38%, #00000035),
+        linear-gradient(135deg, #263244E8, #101725F2);
+    box-shadow:
+        inset 0 0 0 4px #080D16B8,
+        inset 0 0 0 5px color-mix(in srgb, var(--artifact-cube-accent) 45%, transparent),
+        0 8px 18px #000A,
+        0 0 18px color-mix(in srgb, var(--artifact-cube-accent) 25%, transparent);
+    object-fit: contain;
+    filter: drop-shadow(0 4px 5px #0009);
+}
+
+/* First place receives a larger, more ornate gold reliquary. */
+.rank-1 .object-image {
+    width: min(100%, 175px);
+    height: clamp(116px, 15vw, 168px);
+    padding: 14px;
+    border-width: 3px;
+    outline-offset: 5px;
+    box-shadow:
+        inset 0 0 0 5px #080D16C9,
+        inset 0 0 0 6px #E6C76699,
+        0 10px 24px #000B,
+        0 0 26px #D8B65D55;
+}
+
+/* Preserve the existing artifact sizing adjustments for ranks two and three. */
+.rank-2 .object-image {
+    width: min(90%, 135px);
+    height: clamp(90px, 11.5vw, 132px);
+}
+
+.rank-3 .object-image {
+    width: min(120%, 180px);
+    height: clamp(108px, 15vw, 168px);
+}
+
+@media (max-width: 520px) {
+    .object-image {
+        height: clamp(76px, 19vw, 100px);
+        padding: 8px;
+        margin-bottom: 9px;
+        outline-offset: 3px;
+    }
+
+    .rank-1 .object-image {
+        height: clamp(88px, 22vw, 116px);
+        padding: 9px;
+        outline-offset: 4px;
+    }
+
+    .rank-2 .object-image {
+        height: clamp(68px, 17vw, 90px);
+    }
+
+    .rank-3 .object-image {
+        height: clamp(80px, 20vw, 104px);
+    }
 }
