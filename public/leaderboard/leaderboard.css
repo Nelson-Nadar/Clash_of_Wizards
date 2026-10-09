@@ -12,77 +12,118 @@ body {
 }
 
 main {
-    width: min(900px, 92vw);
+    width: min(1000px, 94vw);
     text-align: center;
-    padding: 5vh 0;
+    padding: 4vh 0;
 }
 
-.eyebrow {
-    color: #D4AF37;
-}
-
-.status {
-    color: #E8DCC4;
-}
+.eyebrow { color: #D4AF37; }
+.status { color: #E8DCC4; }
 
 h1 {
-    font: 900 clamp(52px, 10vw, 128px)/.8 'HARRYP__', 'Barlow Condensed', sans-serif;
-    margin: .1em 0 .4em;
+    font: 900 clamp(44px, 8vw, 100px)/.9 'HARRYP__', 'Barlow Condensed', sans-serif;
+    margin: .15em 0 .45em;
     color: #D4AF37;
     text-shadow: 0 0 28px #D4AF3755, 0 3px 8px #090B18;
 }
 
-#list {
+#list { width: 100%; }
+.top-three {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr) minmax(0, 1fr);
+    align-items: end;
+    gap: clamp(8px, 2vw, 22px);
+    margin: 0 auto 22px;
+}
+.podium-entry { min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.podium-entry.rank-1 { order: 2; grid-column: 2; }
+.podium-entry.rank-2 { order: 1; grid-column: 1; }
+.podium-entry.rank-3 { order: 3; grid-column: 3; }
+.rank-label {
+    color: #D4AF37;
+    font: 700 clamp(12px, 2vw, 22px)/1.1 'HARRYP__', 'Barlow Condensed', sans-serif;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+}
+.object-image {
+    display: block;
+    width: min(100%, 150px);
+    height: clamp(74px, 12vw, 130px);
+    object-fit: contain;
+    margin: 0 auto 8px;
+    filter: drop-shadow(0 5px 10px #0008);
+}
+.rank-1 .object-image {
+    width: min(100%, 175px);
+    height: clamp(88px, 14vw, 150px);
+    filter: drop-shadow(0 0 10px #D4AF3744) drop-shadow(0 5px 10px #0008);
+}
+.player-card {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 106px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+    padding: clamp(12px, 2vw, 22px) 8px;
     background: #151D3B;
     border: 1px solid #8F7325;
-    border-radius: 16px;
+    border-radius: 12px 12px 4px 4px;
+    box-shadow: 0 12px 30px #090B1866;
+}
+.rank-1 .player-card { min-height: 132px; border-color: #D4AF37; background: #1b2344; }
+.player-name {
+    font-family: 'HARRYP__', 'Barlow Condensed', sans-serif !important;
+    font-size: clamp(16px, 2.6vw, 29px);
+    line-height: 1.12;
+    color: #E8DCC4;
+    overflow-wrap: anywhere;
+}
+.player-score { color: #E8DCC4; font-size: clamp(15px, 2vw, 22px); font-weight: 700; }
+.rank-1 .player-score { color: #D4AF37; }
+.rank-2 .player-score { color: #B8B8B8; }
+.rank-3 .player-score { color: #A97142; }
+.rest-list {
+    background: #151D3B;
+    border: 1px solid #8F7325;
+    border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 16px 50px #090B1888;
 }
-
 .row {
     display: grid;
-    grid-template-columns: 80px 1fr auto;
+    grid-template-columns: clamp(48px, 8vw, 80px) minmax(0, 1fr) auto;
     align-items: center;
+    gap: 12px;
     text-align: left;
-    padding: clamp(12px, 2vh, 24px);
+    padding: clamp(12px, 1.8vh, 20px) clamp(12px, 2vw, 24px);
     border-bottom: 1px solid #8F7325;
-    font-size: clamp(18px, 3vw, 34px);
+    font-size: clamp(16px, 2.5vw, 27px);
     color: #E8DCC4;
 }
-
-.row:last-child {
-    border-bottom: 0;
+.row:last-child { border-bottom: 0; }
+.row .rank {
+    font: 900 1.25em 'HARRYP__', 'Barlow Condensed', sans-serif;
+    color: #000;
 }
-
-.rank {
-    font: 900 1.5em 'HARRYP__', 'Barlow Condensed', sans-serif;
-    color: #C9A227;
+.row .player-name {
+    font-size: clamp(17px, 2.8vw, 30px);
+    min-width: 0;
 }
+.points { font-weight: 700; color: #E8DCC4; white-space: nowrap; }
+.empty-state { padding: 20px; }
+.footer { color: #E8DCC4; letter-spacing: .2em; font-size: .75rem; margin-top: 24px; }
 
-.points {
-    font-weight: 700;
-    color: #E8DCC4;
-}
-
-.row:nth-child(1) .rank,
-.row:nth-child(1) .points {
-    color: #D4AF37;
-}
-
-.row:nth-child(2) .rank,
-.row:nth-child(2) .points {
-    color: #B8B8B8;
-}
-
-.row:nth-child(3) .rank,
-.row:nth-child(3) .points {
-    color: #A97142;
-}
-
-.footer {
-    color: #E8DCC4;
-    letter-spacing: .2em;
-    font-size: .75rem;
-    margin-top: 28px;
+@media (max-width: 520px) {
+    main { width: 96vw; padding: 3vh 0; }
+    .top-three { gap: 6px; }
+    .rank-label { font-size: clamp(10px, 2.5vw, 13px); }
+    .object-image { height: clamp(58px, 16vw, 82px); margin-bottom: 5px; }
+    .rank-1 .object-image { height: clamp(68px, 18vw, 95px); }
+    .player-card { min-height: 90px; padding: 10px 5px; }
+    .rank-1 .player-card { min-height: 104px; }
+    .player-name { font-size: clamp(13px, 3.2vw, 17px); }
+    .player-score { font-size: clamp(13px, 3vw, 16px); }
+    .row { gap: 8px; }
 }

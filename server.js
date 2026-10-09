@@ -91,6 +91,6 @@ wss.on('connection', ws => {
   ws.on('close',()=>{clients.delete(ws);if(role==='controller'){state.controller=false;broadcast(snapshot());}});
 });
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Clash of Wizards HTTPS server running on https://${network.HOST_IP}:${PORT}`);
+  console.log(`Defense of Hogwarts HTTPS server running on https://${network.HOST_IP}:${PORT}`);
   console.log(`Laptop access: https://localhost:${PORT}`);
 });

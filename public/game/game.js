@@ -5,21 +5,18 @@ const cv = document.querySelector('#game');
 const ctx = cv.getContext('2d');
 const $ = s => document.querySelector(s);
 
-const fruitImages = new Map();
+const entityImages = new Map();
 
-CONFIG.FRUITS.forEach(fruit => {
+[...CONFIG.ENTITIES, CONFIG.SPECIAL_ENTITY, CONFIG.PENALTY_ENTITY].forEach(entity => {
     const image = new Image();
-    image.src = fruit.asset;
-    fruitImages.set(fruit.name, image);
+    image.src = entity.asset;
+    entityImages.set(entity.name, image);
 });
-
-const starImage = new Image();
-starImage.src = '/assets/fruits/star-fruit.svg';
 
 let ws, state = { phase: 'idle', timeLeft: 150 }, objects = [], effects = [], blade = [], prev = null, score = 0, lives = 3, bombs = 0, last = performance.now(), clock = 0, nextSpawn = 0, lastReport = 0, firstRunningFrame = true, gameEnded = false, countdownTimer = null;
 
 const debug = (...details) => {
-    if (CONFIG.DEBUG) console.debug('[Clash of Wizards]', ...details);
+    if (CONFIG.DEBUG) console.debug('[Defense of Hogwarts]', ...details);
 };
 
 function socket() {
@@ -95,7 +92,7 @@ function screen(old) {
 
         const reason = state.completedResult?.gameEndReason || 'ROUND COMPLETE';
 
-        $('#subtitle').textContent = `${score.toLocaleString()} POINTS · BOMBS HIT: ${bombs} · ${reason} · WAITING FOR ADMIN`;
+        $('#subtitle').textContent = `${score.toLocaleString()} POINTS · DOBBY HITS: ${bombs} · ${reason} · WAITING FOR ADMIN`;
 
         s.classList.remove('hidden');
     } else {
@@ -194,8 +191,32 @@ function spawn() {
 
     let bomb = Math.random() < d.bomb;
     let star = !bomb && Math.random() < 0.08;
-    let fruit = CONFIG.FRUITS[(Math.random() * CONFIG.FRUITS.length) | 0];
+    let entity = null;
+    if (!bomb && !star) {
+        const roll = Math.random() * 100;
+        let cumulative = 0;
+        entity = CONFIG.ENTITIES.find(candidate => {
+            cumulative += candidate.weight;
+            return roll < cumulative;
+        }) || CONFIG.ENTITIES[CONFIG.ENTITIES.length - 1];
+    }
     let top = Math.random() < 0.2;
+
+    // Final fine-tuning relative to the v3 entity sizes.
+    // All regular entities except Bellatrix are reduced by 10%.
+    // Bellatrix and Dobby receive their requested boosts; Golden Snitch is reduced by 10%.
+    const entitySizeMultiplier = star
+        ? 1.1 * 1.4 * 0.9
+        : bomb
+            ? 1.7
+            : ({
+                'death_eater.svg': 1.2 * 0.9,
+                'dementors.svg': 1.5 * 0.9,
+                'dragon.svg': 2.6 * 0.9,
+                'troll.svg': 1.9 * 0.9,
+                'werewolf.svg': 1.7 * 0.9,
+                'bellatrix.svg': 1.5 * 1.5
+            }[String(entity.asset).split('/').pop()] || 0.9);
 
     objects.push({
         x: Math.random() * cv.width,
@@ -206,21 +227,14 @@ function spawn() {
             ? 70
             : -(650 + Math.random() * 250) * d.speed,
 
-        r: bomb
-            ? 34
-            : star
-                ? 38
-                : 32,
+        // Keep hit bounds aligned with the individually scaled rendered entity.
+        r: 36 * 1.6 * entitySizeMultiplier,
 
-        type: bomb
-            ? 'bomb'
-            : star
-                ? 'star'
-                : 'fruit',
+        type: bomb ? 'bomb' : star ? 'star' : 'entity',
 
-        fruitName: star ? null : fruit.name,
-        asset: star ? null : fruit.asset,
-        color: star ? '#ffe568' : fruit.color,
+        entityName: bomb ? CONFIG.PENALTY_ENTITY.name : star ? CONFIG.SPECIAL_ENTITY.name : entity.name,
+        asset: bomb ? CONFIG.PENALTY_ENTITY.asset : star ? CONFIG.SPECIAL_ENTITY.asset : entity.asset,
+        color: bomb ? CONFIG.PENALTY_ENTITY.color : star ? CONFIG.SPECIAL_ENTITY.color : entity.color,
 
         rot: Math.random() * 6,
         spin: (Math.random() - 0.5) * 5,
@@ -230,7 +244,7 @@ function spawn() {
     debug(
         'OBJECT_CREATED',
         objects.at(-1).type,
-        objects.at(-1).fruitName
+        objects.at(-1).entityName
     );
 }
 
@@ -286,50 +300,20 @@ function draw(o) {
     ctx.translate(o.x, o.y);
     ctx.rotate(o.rot);
 
-    if (o.type === 'bomb') {
-        ctx.fillStyle = '#121624';
+    const image = entityImages.get(o.entityName);
 
-        ctx.beginPath();
-        ctx.arc(0, 5, o.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#8290ba';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        ctx.strokeStyle = '#ffcc53';
-
-        ctx.beginPath();
-        ctx.moveTo(5, -27);
-        ctx.quadraticCurveTo(18, -48, 25, -35);
-        ctx.stroke();
-
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('!', 0, 13);
+    if (image && image.complete && image.naturalWidth > 0) {
+        const size = o.r * 2;
+        // Preserve each asset's intrinsic aspect ratio while fitting it within the entity bounds.
+        const aspect = image.naturalWidth / image.naturalHeight;
+        const width = aspect >= 1 ? size : size * aspect;
+        const height = aspect >= 1 ? size / aspect : size;
+        ctx.drawImage(image, -width / 2, -height / 2, width, height);
     } else {
-        const image = o.type === 'star'
-            ? starImage
-            : fruitImages.get(o.fruitName);
-
-        if (image && image.complete && image.naturalWidth > 0) {
-            const size = o.r * 2;
-
-            ctx.drawImage(
-                image,
-                -size / 2,
-                -size / 2,
-                size,
-                size
-            );
-        } else {
-            ctx.fillStyle = o.color;
-
-            ctx.beginPath();
-            ctx.arc(0, 0, o.r, 0, Math.PI * 2);
-            ctx.fill();
-        }
+        ctx.fillStyle = o.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, o.r, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     ctx.restore();

@@ -1,4 +1,4 @@
-# Clash of Wizards — local HTTPS event setup
+# Defense of Hogwarts — local HTTPS event setup
 
 This app runs only on the laptop and its USB-tethered phone network. The phone Controller must use HTTPS so Chrome can request camera access. Camera frames remain on the phone; it sends only normalized laser coordinates over the secure WebSocket connection.
 

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Clash of Wizards — Admin</title>
+    <title>Defense of Hogwarts — Admin</title>
     <link rel="stylesheet" href="/shared.css">
     <link rel="stylesheet" href="admin.css">
 </head>
@@ -14,7 +14,7 @@
         <header>
             <div>
                 <div class="eyebrow">Event operator console</div>
-                <h1>Clash of Wizards</h1>
+                <h1>Defense of Hogwarts</h1>
             </div>
             <div id="connection" class="status">● Controller checking…</div>
         </header>
@@ -54,7 +54,7 @@
     <dialog id="pinDialog">
         <form method="dialog">
             <h2>Confirm deletion</h2>
-            <p>Enter the organizer’s 6-digit confirmation PIN.</p><input id="pin" inputmode="numeric" pattern="[0-9]{6}"
+            <p>Enter the organizer’s 6-digit confirmation PIN.</p><input id="pin" type="password" inputmode="numeric" autocomplete="off" pattern="[0-9]{6}"
                 maxlength="6" placeholder="••••••">
             <div class="actions"><button value="cancel" class="outline">Cancel</button><button id="confirm"
                     value="default" class="danger">Delete</button></div>

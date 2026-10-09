@@ -8,31 +8,20 @@ export const CONFIG = {
     },
 
     DIFFICULTY: {
-        easy: {
-            interval: 1100,
-            speed: 0.72,
-            max: 4,
-            bomb: 0.09
-        },
-        medium: {
-            interval: 760,
-            speed: 1,
-            max: 6,
-            bomb: 0.16
-        },
-        hard: {
-            interval: 520,
-            speed: 1.32,
-            max: 8,
-            bomb: 0.24
-        }
+        easy: { interval: 1100, speed: 0.72, max: 4, bomb: 0.09 },
+        medium: { interval: 760, speed: 1, max: 6, bomb: 0.16 },
+        hard: { interval: 520, speed: 1.32, max: 8, bomb: 0.24 }
     },
 
-    FRUITS: [
-        { name: 'apple', asset: '/assets/fruits/apple.svg', color: '#e84b4b' },
-        { name: 'banana', asset: '/assets/fruits/banana.svg', color: '#ffe56d' },
-        { name: 'orange', asset: '/assets/fruits/orange.svg', color: '#ffae34' },
-        { name: 'strawberry', asset: '/assets/fruits/strawberry.svg', color: '#e84b4b' },
-        { name: 'watermelon', asset: '/assets/fruits/watermelon.svg', color: '#61c96b' }
-    ]
+    ENTITIES: [
+        { name: 'dementor', asset: '/assets/entities/dementors.svg', color: '#6f7b98', weight: 50 },
+        { name: 'bellatrix', asset: '/assets/entities/bellatrix.svg', color: '#b58bcb', weight: 5 },
+        { name: 'death_eater', asset: '/assets/entities/death_eater.svg', color: '#8c8c9b', weight: 11.25 },
+        { name: 'dragon', asset: '/assets/entities/dragon.svg', color: '#c94c42', weight: 11.25 },
+        { name: 'troll', asset: '/assets/entities/troll.svg', color: '#7c9a70', weight: 11.25 },
+        { name: 'werewolf', asset: '/assets/entities/werewolf.svg', color: '#a49b8d', weight: 11.25 }
+    ],
+
+    SPECIAL_ENTITY: { name: 'golden_snitch', asset: '/assets/entities/golden_snitch.svg', color: '#ffe568' },
+    PENALTY_ENTITY: { name: 'dobby', asset: '/assets/entities/dobby.svg', color: '#b5d5bd' }
 };
