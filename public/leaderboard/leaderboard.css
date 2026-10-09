@@ -7,8 +7,8 @@
 body {
     display: grid;
     place-items: center;
-    background: #0B1026;
-    color: #E8DCC4;
+    background: #10152A;
+    color: #F1E8D5;
 }
 
 main {
@@ -18,7 +18,7 @@ main {
 }
 
 .eyebrow { color: #D4AF37; }
-.status { color: #E8DCC4; }
+.status { color: #F1E8D5; }
 
 h1 {
     font: 900 clamp(44px, 8vw, 100px)/.9 'HARRYP__', 'Barlow Condensed', sans-serif;
@@ -35,17 +35,68 @@ h1 {
     gap: clamp(8px, 2vw, 22px);
     margin: 0 auto 22px;
 }
-.podium-entry { min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.podium-entry {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* Position-specific magical dust stays behind the artifact and within each podium. */
+.podium-entry::before,
+.podium-entry::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+}
+.podium-entry::before {
+    top: 38px;
+    left: 50%;
+    width: min(92%, 210px);
+    height: 145px;
+    transform: translateX(-50%);
+    opacity: .8;
+    background: radial-gradient(ellipse at center, var(--aura-core) 0%, var(--aura-mid) 35%, transparent 72%);
+    filter: blur(8px);
+}
+.podium-entry::after {
+    top: 42px;
+    left: 50%;
+    width: min(100%, 230px);
+    height: 135px;
+    transform: translateX(-50%);
+    opacity: .72;
+    background:
+        radial-gradient(circle at 18% 45%, var(--aura-particle) 0 1px, transparent 2px),
+        radial-gradient(circle at 30% 24%, var(--aura-particle) 0 1px, transparent 2px),
+        radial-gradient(circle at 73% 28%, var(--aura-particle) 0 1px, transparent 2px),
+        radial-gradient(circle at 84% 56%, var(--aura-particle) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 62% 76%, var(--aura-particle) 0 1px, transparent 2px),
+        radial-gradient(circle at 40% 68%, var(--aura-particle) 0 1px, transparent 2px);
+}
+.podium-entry.rank-1 { --aura-core: #D4AF3738; --aura-mid: #D4AF371C; --aura-particle: #F2C94C; }
+.podium-entry.rank-2 { --aura-core: #AAB9CC2B; --aura-mid: #AAB9CC16; --aura-particle: #DCE6F2; }
+.podium-entry.rank-3 { --aura-core: #B77B522B; --aura-mid: #B77B5216; --aura-particle: #D49A6C; }
+.podium-entry.rank-1::before { opacity: 1; }
+.podium-entry.rank-2::before { opacity: .72; }
+.podium-entry.rank-3::before { opacity: .68; }
 .podium-entry.rank-1 { order: 2; grid-column: 2; }
 .podium-entry.rank-2 { order: 1; grid-column: 1; }
 .podium-entry.rank-3 { order: 3; grid-column: 3; }
 .rank-label {
+    position: relative;
+    z-index: 1;
     color: #D4AF37;
     font: 700 clamp(12px, 2vw, 22px)/1.1 'HARRYP__', 'Barlow Condensed', sans-serif;
     letter-spacing: .04em;
     margin-bottom: 8px;
 }
 .object-image {
+    position: relative;
+    z-index: 1;
     display: block;
     width: min(100%, 150px);
     height: clamp(74px, 12vw, 130px);
@@ -59,6 +110,7 @@ h1 {
     filter: drop-shadow(0 0 10px #D4AF3744) drop-shadow(0 5px 10px #0008);
 }
 .player-card {
+    position: relative;
     box-sizing: border-box;
     width: 100%;
     min-height: 106px;
@@ -67,26 +119,41 @@ h1 {
     justify-content: center;
     gap: 9px;
     padding: clamp(12px, 2vw, 22px) 8px;
-    background: #151D3B;
-    border: 1px solid #8F7325;
+    background: linear-gradient(145deg, #202A49 0%, #1B2442 55%, #171F3A 100%);
+    border: 1px solid #AAB9CC88;
     border-radius: 12px 12px 4px 4px;
-    box-shadow: 0 12px 30px #090B1866;
+    box-shadow: 0 12px 30px #05081480, inset 0 1px 0 #FFFFFF0D;
 }
-.rank-1 .player-card { min-height: 132px; border-color: #D4AF37; background: #1b2344; }
+.player-card::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 1px solid #FFFFFF0B;
+    border-radius: 8px 8px 2px 2px;
+    pointer-events: none;
+}
+.rank-1 .player-card {
+    min-height: 132px;
+    border-color: #D4AF37;
+    background: linear-gradient(145deg, #29304B 0%, #1B2442 58%, #1A2038 100%);
+    box-shadow: 0 0 0 1px #D4AF3718, 0 0 22px #D4AF3724, 0 14px 32px #05081499, inset 0 1px 0 #F2C94C22;
+}
+.rank-2 .player-card { border-color: #AAB9CC99; }
+.rank-3 .player-card { border-color: #B77B5299; }
 .player-name {
     font-family: 'HARRYP__', 'Barlow Condensed', sans-serif !important;
     font-size: clamp(16px, 2.6vw, 29px);
     line-height: 1.12;
-    color: #E8DCC4;
+    color: #F1E8D5;
     overflow-wrap: anywhere;
 }
-.player-score { color: #E8DCC4; font-size: clamp(15px, 2vw, 22px); font-weight: 700; }
+.player-score { color: #F1E8D5; font-size: clamp(15px, 2vw, 22px); font-weight: 700; }
 .rank-1 .player-score { color: #D4AF37; }
-.rank-2 .player-score { color: #B8B8B8; }
-.rank-3 .player-score { color: #A97142; }
+.rank-2 .player-score { color: #AAB9CC; }
+.rank-3 .player-score { color: #B77B52; }
 .rest-list {
-    background: #151D3B;
-    border: 1px solid #8F7325;
+    background: #1B2442;
+    border: 1px solid #79652F;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 16px 50px #090B1888;
@@ -98,22 +165,22 @@ h1 {
     gap: 12px;
     text-align: left;
     padding: clamp(12px, 1.8vh, 20px) clamp(12px, 2vw, 24px);
-    border-bottom: 1px solid #8F7325;
+    border-bottom: 1px solid #79652F66;
     font-size: clamp(16px, 2.5vw, 27px);
-    color: #E8DCC4;
+    color: #F1E8D5;
 }
 .row:last-child { border-bottom: 0; }
 .row .rank {
     font: 900 1.25em 'HARRYP__', 'Barlow Condensed', sans-serif;
-    color: #000;
+    color: #D4AF37;
 }
 .row .player-name {
     font-size: clamp(17px, 2.8vw, 30px);
     min-width: 0;
 }
-.points { font-weight: 700; color: #E8DCC4; white-space: nowrap; }
+.points { font-weight: 700; color: #F1E8D5; white-space: nowrap; }
 .empty-state { padding: 20px; }
-.footer { color: #E8DCC4; letter-spacing: .2em; font-size: .75rem; margin-top: 24px; }
+.footer { color: #F1E8D5; letter-spacing: .2em; font-size: .75rem; margin-top: 24px; }
 
 @media (max-width: 520px) {
     main { width: 96vw; padding: 3vh 0; }
@@ -126,4 +193,8 @@ h1 {
     .player-name { font-size: clamp(13px, 3.2vw, 17px); }
     .player-score { font-size: clamp(13px, 3vw, 16px); }
     .row { gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .podium-entry::before, .podium-entry::after { animation: none !important; }
 }
