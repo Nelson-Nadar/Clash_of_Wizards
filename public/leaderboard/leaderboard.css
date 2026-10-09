@@ -198,3 +198,207 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
     .podium-entry::before, .podium-entry::after { animation: none !important; }
 }
+
+
+/* === Ancient stone podium redesign: Headmaster's Throne / Enchanted Bastion / Ancient Reliquary === */
+.top-three {
+    --podium-gap: clamp(8px, 2vw, 22px);
+    align-items: end;
+    gap: var(--podium-gap);
+    padding: clamp(12px, 2vh, 24px) 0 0;
+}
+.podium-entry {
+    --stone-accent: #D8B65D;
+    --stone-accent-bright: #F4D987;
+    --stone-accent-deep: #72501E;
+    --stone-aura: #D8B65D;
+    min-width: 0;
+}
+.podium-entry.rank-1 {
+    --stone-accent: #D8B65D;
+    --stone-accent-bright: #FFE7A0;
+    --stone-accent-deep: #75501C;
+    --stone-aura: #E6B944;
+}
+.podium-entry.rank-2 {
+    --stone-accent: #BFC7CE;
+    --stone-accent-bright: #E0E5E9;
+    --stone-accent-deep: #56616D;
+    --stone-aura: #CFDCE8;
+}
+.podium-entry.rank-3 {
+    --stone-accent: #B98255;
+    --stone-accent-bright: #D6A078;
+    --stone-accent-deep: #69402A;
+    --stone-aura: #C58A5C;
+}
+.podium-entry::before {
+    top: 52px;
+    width: min(100%, 270px);
+    height: 210px;
+    background: radial-gradient(ellipse at 50% 18%, color-mix(in srgb, var(--stone-aura) 30%, transparent), transparent 70%);
+    filter: blur(12px);
+    opacity: .8;
+}
+.podium-entry::after {
+    top: 52px;
+    width: min(100%, 260px);
+    height: 190px;
+    opacity: .6;
+}
+.rank-label {
+    color: var(--stone-accent-bright);
+    text-shadow: 0 1px 3px #000, 0 0 12px color-mix(in srgb, var(--stone-accent) 28%, transparent);
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+}
+.object-image {
+    filter: drop-shadow(0 7px 8px #000B) drop-shadow(0 0 9px color-mix(in srgb, var(--stone-accent) 16%, transparent));
+}
+.rank-1 .object-image { filter: drop-shadow(0 0 12px #D8B65D55) drop-shadow(0 7px 10px #000B); }
+.player-card {
+    --monument-height: clamp(190px, 23vw, 270px);
+    isolation: isolate;
+    overflow: visible;
+    min-height: var(--monument-height);
+    height: var(--monument-height);
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 clamp(8px, 1vw, 14px) clamp(18px, 2.4vw, 28px);
+    border: 0;
+    border-radius: 2px 2px 0 0;
+    color: #fff;
+    background:
+        linear-gradient(90deg, #07090D 0%, transparent 7%, #FFFFFF08 11%, transparent 19%, transparent 81%, #FFFFFF09 90%, #080A0D 100%),
+        repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 13px),
+        repeating-linear-gradient(90deg, #00000012 0 2px, transparent 2px 19px),
+        radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--stone-accent) 19%, #34383C) 0%, transparent 48%),
+        linear-gradient(105deg, #292D31 0%, #1D2125 22%, #303438 47%, #191C20 76%, #292D31 100%);
+    box-shadow:
+        0 18px 24px #0008,
+        0 5px 0 #090B0E,
+        0 8px 0 #35393D,
+        inset 0 0 0 2px #080A0D,
+        inset 0 0 0 4px color-mix(in srgb, var(--stone-accent) 65%, #282828),
+        inset 0 0 0 7px #171A1D,
+        inset 0 10px 15px #FFFFFF0B,
+        inset 0 -20px 28px #0008;
+}
+/* Heavy capstone, bevel highlights, and fine engraved inner frame. */
+.player-card::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    top: -12px;
+    left: -5px;
+    right: -5px;
+    height: 20px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--stone-accent-bright) 72%, #FFFFFF) 0%, var(--stone-accent) 16%, #3B3730 34%, #24272A 65%, #101215 100%);
+    border: 1px solid color-mix(in srgb, var(--stone-accent) 78%, #272727);
+    clip-path: polygon(2% 0, 98% 0, 100% 32%, 97% 100%, 3% 100%, 0 32%);
+    box-shadow: 0 -3px 13px color-mix(in srgb, var(--stone-accent) 28%, transparent);
+}
+.player-card::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 12px 10px 10px;
+    border: 1px solid color-mix(in srgb, var(--stone-accent) 38%, #17191C);
+    border-radius: 0;
+    background:
+        linear-gradient(135deg, #FFFFFF05, transparent 28% 72%, #0000001C),
+        repeating-linear-gradient(135deg, transparent 0 19px, color-mix(in srgb, var(--stone-accent) 5%, transparent) 20px, transparent 21px 37px);
+    box-shadow: inset 0 0 0 3px #080A0D, inset 0 0 0 4px #FFFFFF08;
+    pointer-events: none;
+}
+.player-name,
+.player-score {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    text-shadow: 0 2px 4px #000, 0 1px 1px #000;
+}
+.player-name {
+    color: #FFFFFF;
+    font-weight: 800;
+    padding: 12px 7px 8px;
+    background: linear-gradient(90deg, transparent, #080A0DD9 12% 88%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--stone-accent) 48%, transparent);
+    border-bottom: 1px solid #FFFFFF10;
+    line-height: 1.15;
+    font-size: clamp(15px, 2.25vw, 26px);
+}
+.player-score {
+    font-size: clamp(16px, 2.1vw, 23px);
+    font-weight: 800;
+    letter-spacing: .035em;
+    padding: 0 4px;
+}
+.rank-1 .player-card {
+    --monument-height: clamp(260px, 30vw, 350px);
+    background:
+        linear-gradient(90deg, #080A0D 0%, transparent 8%, #FFFFFF09 12%, transparent 21%, transparent 79%, #FFFFFF09 89%, #080A0D 100%),
+        repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 12px),
+        repeating-linear-gradient(90deg, #00000012 0 2px, transparent 2px 18px),
+        radial-gradient(ellipse at 50% 0%, #6B562B 0%, #37332A 22%, transparent 53%),
+        linear-gradient(105deg, #292B2D 0%, #1B1E21 24%, #343638 49%, #191B1D 76%, #2D2E2E 100%);
+    box-shadow: 0 0 26px #D8B65D19, 0 22px 28px #0009, 0 5px 0 #090B0E, 0 9px 0 #51452C, inset 0 0 0 2px #080A0D, inset 0 0 0 4px #D8B65D, inset 0 0 0 8px #171A1D, inset 0 0 0 10px #8E7135, inset 0 14px 18px #FFE7A015, inset 0 -24px 32px #0009;
+}
+.rank-1 .player-card::before {
+    top: -16px;
+    left: -7px;
+    right: -7px;
+    height: 26px;
+    background: linear-gradient(180deg, #FFF0B8 0%, #D8B65D 14%, #8C6828 32%, #383027 55%, #1B1C1C 100%);
+    box-shadow: 0 -3px 17px #D8B65D48;
+}
+.rank-1 .player-name { font-size: clamp(17px, 2.55vw, 29px); }
+.rank-1 .player-score { color: #F0D48A; text-shadow: 0 0 10px #D8B65D55, 0 2px 4px #000; }
+.rank-2 .player-card {
+    --monument-height: clamp(220px, 25.5vw, 298px);
+    background:
+        linear-gradient(90deg, #080A0D 0%, transparent 8%, #FFFFFF09 12%, transparent 21%, transparent 79%, #FFFFFF09 89%, #080A0D 100%),
+        repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 13px),
+        repeating-linear-gradient(90deg, #00000012 0 2px, transparent 2px 19px),
+        radial-gradient(ellipse at 50% 0%, #3D444A 0%, transparent 54%),
+        linear-gradient(105deg, #292D31, #1D2125 26%, #303438 50%, #191C20 77%, #292D31);
+    box-shadow: 0 18px 24px #0008, 0 5px 0 #090B0E, 0 8px 0 #454C52, inset 0 0 0 2px #080A0D, inset 0 0 0 4px #BFC7CE, inset 0 0 0 7px #171A1D, inset 0 0 0 9px #646F78, inset 0 10px 15px #E0E5E90B, inset 0 -20px 28px #0008;
+}
+.rank-2 .player-score { color: #D5DDE3; text-shadow: 0 0 8px #BFC7CE33, 0 2px 4px #000; }
+.rank-3 .player-card {
+    --monument-height: clamp(190px, 21.5vw, 252px);
+    background:
+        linear-gradient(90deg, #080A0D 0%, transparent 8%, #FFFFFF07 12%, transparent 21%, transparent 79%, #FFFFFF07 89%, #080A0D 100%),
+        repeating-linear-gradient(0deg, #FFFFFF04 0 1px, transparent 1px 14px),
+        repeating-linear-gradient(90deg, #00000012 0 2px, transparent 2px 19px),
+        radial-gradient(ellipse at 50% 0%, #49372D 0%, transparent 54%),
+        linear-gradient(105deg, #292B2D, #1D2022 26%, #303234 50%, #191B1D 77%, #292B2D);
+    box-shadow: 0 18px 24px #0008, 0 5px 0 #090B0E, 0 8px 0 #49372C, inset 0 0 0 2px #080A0D, inset 0 0 0 4px #B98255, inset 0 0 0 7px #171A1D, inset 0 0 0 9px #65452F, inset 0 10px 15px #D6A0780A, inset 0 -20px 28px #0008;
+}
+.rank-3 .player-score { color: #D6A078; text-shadow: 0 0 8px #B9825533, 0 2px 4px #000; }
+
+@media (max-width: 520px) {
+    .top-three { gap: 6px; padding-top: 10px; }
+    .rank-label { letter-spacing: .025em; margin-bottom: 7px; }
+    .player-card {
+        --monument-height: clamp(150px, 43vw, 205px);
+        padding: 0 4px 15px;
+    }
+    .rank-1 .player-card { --monument-height: clamp(205px, 57vw, 265px); }
+    .rank-2 .player-card { --monument-height: clamp(178px, 49vw, 230px); }
+    .rank-3 .player-card { --monument-height: clamp(150px, 43vw, 205px); }
+    .player-card::after { inset: 10px 7px 8px; }
+    .player-card::before { left: -3px; right: -3px; }
+    .rank-1 .player-card::before { left: -4px; right: -4px; }
+    .player-name { padding: 9px 4px 7px; font-size: clamp(12px, 3.25vw, 16px); }
+    .rank-1 .player-name { font-size: clamp(13px, 3.5vw, 17px); }
+    .player-score { font-size: clamp(12px, 3.15vw, 16px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .podium-entry, .player-card { transition: none !important; }
+}
