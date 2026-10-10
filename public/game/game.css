@@ -112,3 +112,32 @@ body {
     border-color: #8fd8ff;
     color: #8fd8ff;
 }
+
+
+#splash { z-index: 5; padding: 2vh 2vw; overflow: auto; }
+#splash h1 { font-size: clamp(38px, 7vw, 105px); }
+#splash p { margin: .35em 0 .65em; }
+#entityGuide { width: min(1050px, 94vw); margin: 0 auto; color: #F1E8D5; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 1px 3px #000; }
+.guide-special, .guide-normal { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: clamp(7px, 1.2vw, 16px); }
+.guide-special { margin-bottom: 8px; }
+.guide-item { min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 8px; border: 1px solid #D4AF3766; border-radius: 8px; background: #10162dcc; font-size: clamp(10px, 1.1vw, 15px); }
+.guide-item > img:first-child { width: clamp(28px, 3vw, 44px); height: clamp(28px, 3vw, 44px); object-fit: contain; }
+.guide-item .score-token { width: clamp(42px, 5vw, 68px); height: clamp(25px, 3vw, 40px); object-fit: contain; }
+.guide-special .guide-item:first-child { border-color: #F2C94C99; }
+.guide-special .guide-item:nth-child(2) { border-color: #FF537999; }
+#factionSelect { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: #080a18ed; color: #F1E8D5; font-family: 'HARRYP__', sans-serif; }
+.faction-grid-lines { position: absolute; inset: 0; background: linear-gradient(to right, transparent calc(50% - 2px), #D4AF37cc calc(50% - 1px), #D4AF37cc calc(50% + 1px), transparent calc(50% + 2px)), linear-gradient(to bottom, transparent calc(50% - 2px), #D4AF37cc calc(50% - 1px), #D4AF37cc calc(50% + 1px), transparent calc(50% + 2px)); pointer-events: none; }
+.faction-option { position: absolute; width: 50%; height: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.2vh, 14px); isolation: isolate; }
+.faction-option:nth-of-type(2) { left: 0; top: 0; --faction-color: #740001; }
+.faction-option:nth-of-type(3) { left: 50%; top: 0; --faction-color: #1A472A; }
+.faction-option:nth-of-type(4) { left: 0; top: 50%; --faction-color: #ECB939; }
+.faction-option:nth-of-type(5) { left: 50%; top: 50%; --faction-color: #0E1A40; }
+.faction-option > img { position: relative; z-index: 1; width: clamp(95px, 15vw, 230px); height: clamp(95px, 15vw, 230px); object-fit: contain; border: 3px solid var(--faction-color); border-radius: 50%; box-shadow: 0 0 25px color-mix(in srgb, var(--faction-color), transparent 30%); }
+.faction-option > span { z-index: 1; color: var(--faction-color); font-size: clamp(18px, 3vw, 38px); text-shadow: 0 2px 5px #000; }
+.faction-progress { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.faction-progress i { display: block; height: 100%; width: 0; background: var(--faction-color); opacity: .5; transition: none; }
+.faction-option.confirmed > img { outline: 5px solid var(--faction-color); }
+.hogwarts-center { position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%,-50%); width: clamp(65px, 9vw, 130px); height: clamp(65px, 9vw, 130px); object-fit: contain; border: 3px solid #D4AF37; border-radius: 50%; box-shadow: 0 0 20px #D4AF3788; }
+.faction-instructions { position: absolute; z-index: 4; bottom: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 92vw; text-align: center; color: #F1E8D5; font-size: clamp(14px, 1.8vw, 24px); text-shadow: 0 2px 5px #000; }
+@media (max-height: 650px) { #splash { place-content: start center; } #splash h1 { font-size: clamp(32px, 6vh, 60px); } .guide-item { padding: 3px 5px; } .guide-item > img:first-child { width: 26px; height: 26px; } .guide-item .score-token { width: 42px; height: 25px; } }
+@media (max-width: 600px) { .guide-item { gap: 3px; } .guide-normal { gap: 4px; } .faction-option > img { width: clamp(72px, 20vw, 125px); height: clamp(72px, 20vw, 125px); } }

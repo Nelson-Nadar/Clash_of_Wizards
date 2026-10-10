@@ -22,7 +22,7 @@ function syncHighScore() {
   store.highScore = store.leaderboard.reduce((highest, record) => Math.max(highest, Number(record.score) || 0), 0);
 }
 syncHighScore();
-let state = { phase: 'idle', score: 0, lives: 3, bombsHit: 0, duration: 150, difficulty: 'medium', timeLeft: 150, controller: false, calibration: store.calibration || null, completedResult: null };
+let state = { phase: 'idle', score: 0, lives: 3, bombsHit: 0, duration: 150, difficulty: 'medium', timeLeft: 150, controller: false, calibration: store.calibration || null, completedResult: null, faction: null };
 let clients = new Set();
 let pendingEndReason = null;
 
@@ -38,20 +38,21 @@ wss.on('connection', ws => {
   clients.add(ws); let role='viewer'; send(ws, snapshot());
   ws.on('message', raw => { let msg; try { msg=JSON.parse(raw); } catch { return; }
     if (msg.type==='hello') { role=msg.role || role; if(role==='controller') { state.controller=true; broadcast(snapshot()); } return; }
-    if (msg.type==='laser' && role==='controller') { if(state.phase==='running') broadcast({type:'laser', detected:!!msg.detected, x:msg.x, y:msg.y, timestamp:msg.timestamp}, ws); return; }
+    if (msg.type==='laser' && role==='controller') { if(['selecting','running'].includes(state.phase)) broadcast({type:'laser', detected:!!msg.detected, x:msg.x, y:msg.y, timestamp:msg.timestamp}, ws); return; }
     // The countdown is rendered by the Game client, so only that client can
     // acknowledge its completion. Admin remains the sole controller of all
     // other lifecycle commands.
     if (msg.type==='countdownComplete' && role==='game') { if(state.phase==='countdown') { state.phase='running'; broadcast(snapshot()); } return; }
+    if (msg.type==='factionSelected' && role==='game') { const valid=['gryffindor','slytherin','hufflepuff','ravenclaw']; if(state.phase==='selecting' && valid.includes(msg.faction) && !state.faction) { state.faction=msg.faction; state.phase='countdown'; broadcast(snapshot()); } return; }
     if (msg.type==='calibration' && role==='controller') { state.calibration=msg.points; store.calibration=msg.points; save(); broadcast(snapshot()); return; }
     if (msg.type==='command' && role!=='admin') return;
     if (msg.type==='command') {
       const c=msg.command;
-      if(c==='start' && ['idle','over'].includes(state.phase)) { pendingEndReason=null; state={...state,phase:'countdown',score:0,lives:3,bombsHit:0,timeLeft:msg.duration||150,duration:msg.duration||150,difficulty:msg.difficulty||'medium',completedResult:null}; broadcast(snapshot()); }
+      if(c==='start' && ['idle','over'].includes(state.phase)) { pendingEndReason=null; state={...state,phase:'selecting',score:0,lives:3,bombsHit:0,timeLeft:msg.duration||150,duration:msg.duration||150,difficulty:msg.difficulty||'medium',completedResult:null,faction:null}; broadcast(snapshot()); }
       if(c==='pause' && state.phase==='running') { state.phase='paused'; broadcast(snapshot()); }
       if(c==='resume' && state.phase==='paused') { state.phase='running'; broadcast(snapshot()); }
-      if(c==='end' && ['running','paused','countdown'].includes(state.phase)) { pendingEndReason='ADMIN_ENDED'; broadcast({type:'endGame',reason:'ADMIN_ENDED'}); }
-      if(c==='reset') { pendingEndReason=null; state={...state,phase:'idle',score:0,lives:3,bombsHit:0,timeLeft:state.duration,completedResult:null}; broadcast(snapshot()); }
+      if(c==='end' && ['running','paused','countdown','selecting'].includes(state.phase)) { pendingEndReason='ADMIN_ENDED'; broadcast({type:'endGame',reason:'ADMIN_ENDED'}); }
+      if(c==='reset') { pendingEndReason=null; state={...state,phase:'idle',score:0,lives:3,bombsHit:0,timeLeft:state.duration,completedResult:null,faction:null}; broadcast(snapshot()); }
       return;
     }
     if(msg.type==='gameUpdate' && role==='game' && ['running','paused'].includes(state.phase)) {
@@ -62,7 +63,7 @@ wss.on('connection', ws => {
       broadcast(snapshot());
       return;
     }
-    if(msg.type==='gameComplete' && role==='game' && ['running','paused','countdown'].includes(state.phase)) {
+    if(msg.type==='gameComplete' && role==='game' && ['running','paused','countdown','selecting'].includes(state.phase)) {
       const score=Math.max(0,Number(msg.score)||0);
       const highestScore=Math.max(score, store.highScore || 0);
       const livesRemaining=Math.max(0,Number(msg.livesRemaining)||0);
@@ -76,13 +77,13 @@ wss.on('connection', ws => {
       state.bombsHit=bombsHit;
       state.timeLeft=gameEndReason==='TIME' ? 0 : Math.max(0,Number(msg.timeLeft) || state.timeLeft);
       state.phase='over';
-      state.completedResult={score,highestScore,livesRemaining,bombsHit,difficulty:state.difficulty,duration,gameEndReason};
+      state.completedResult={score,highestScore,livesRemaining,bombsHit,difficulty:state.difficulty,duration,faction:state.faction,gameEndReason};
       pendingEndReason=null;
       if(score>store.highScore){store.highScore=score;save();}
       broadcast(snapshot());
       return;
     }
-    if(msg.type==='submitScore' && role==='admin' && state.phase==='over') { const record={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:sanitizeName(msg.name),score:state.score,difficulty:state.difficulty,duration:state.duration,bombsHit:state.bombsHit,createdAt:new Date().toISOString()}; store.leaderboard.push(record); save(); broadcast(snapshot()); return; }
+    if(msg.type==='submitScore' && role==='admin' && state.phase==='over') { const record={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:sanitizeName(msg.name),score:state.score,difficulty:state.difficulty,duration:state.duration,bombsHit:state.bombsHit,faction:state.faction || null,createdAt:new Date().toISOString()}; store.leaderboard.push(record); save(); broadcast(snapshot()); return; }
     if((msg.type==='deleteRecord' || msg.type==='clearLeaderboard') && role==='admin') { if(String(msg.pin)!==ADMIN_PIN) return send(ws,{type:'error',message:'Incorrect confirmation PIN.'}); if(msg.type==='deleteRecord') store.leaderboard=store.leaderboard.filter(x=>x.id!==msg.id); else store.leaderboard=[];
       syncHighScore();
       save();

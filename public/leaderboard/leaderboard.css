@@ -506,3 +506,13 @@ h1 {
         height: clamp(80px, 20vw, 104px);
     }
 }
+
+
+/* Small house emblems are additive; podium artifacts and leaderboard ordering stay unchanged. */
+.faction-logo { width: clamp(28px, 3.2vw, 44px); height: clamp(28px, 3.2vw, 44px); object-fit: contain; border-radius: 50%; border: 1px solid #D4AF37aa; box-shadow: 0 0 8px #D4AF3722; flex: 0 0 auto; }
+.player-card > .faction-logo { width: clamp(28px, 3vw, 42px); height: clamp(28px, 3vw, 42px); margin: 0 auto 4px; }
+.row { grid-template-columns: clamp(48px, 8vw, 80px) minmax(0, 1fr) auto; }
+.row-player { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.row-player .player-name { min-width: 0; flex: 0 1 auto; overflow-wrap: anywhere; }
+.row-player .faction-logo { width: clamp(24px, 2.8vw, 36px); height: clamp(24px, 2.8vw, 36px); }
+@media (max-width: 520px) { .row-player { gap: 6px; } .row-player .faction-logo { width: 24px; height: 24px; } .player-card > .faction-logo { width: 25px; height: 25px; } }

@@ -127,7 +127,10 @@ $('#enableAudio')?.addEventListener('click', unlockAudio);
     entityImages.set(entity.name, image);
 });
 
+let bladeColor = '#9dfff0';
 let ws, state = { phase: 'idle', timeLeft: 150 }, objects = [], effects = [], blade = [], bladePointCount = 0, prev = null, score = 0, lives = 3, bombs = 0, last = performance.now(), clock = 0, nextSpawn = 0, lastReport = 0, firstRunningFrame = true, gameEnded = false, countdownTimer = null;
+const FACTIONS = { gryffindor: { color: '#740001', x: 0.25, y: 0.25 }, slytherin: { color: '#1A472A', x: 0.75, y: 0.25 }, hufflepuff: { color: '#ECB939', x: 0.25, y: 0.75 }, ravenclaw: { color: '#0E1A40', x: 0.75, y: 0.75 } };
+let selectedFaction = null, factionHover = null, factionHoverSince = 0, factionLastLaserAt = 0, factionSelectionLocked = false;
 
 const debug = (...details) => {
     if (CONFIG.DEBUG) console.debug('[Defense of Hogwarts]', ...details);
@@ -146,8 +149,9 @@ function socket() {
             state = m.state;
             $('#high').textContent = m.highScore;
 
-            if (state.phase === 'countdown') gameEnded = false;
-
+            if (state.phase === 'countdown') { gameEnded = false; selectedFaction = state.faction || selectedFaction; factionSelectionLocked = true; $('#factionSelect').classList.add('hidden'); }
+            if (state.phase === 'selecting' && old !== 'selecting') { selectedFaction = null; factionHover = null; factionHoverSince = 0; factionLastLaserAt = 0; factionSelectionLocked = false; resetFactionHover(); $('#factionSelect').classList.remove('hidden'); $('#splash').classList.add('hidden'); }
+            if (state.phase !== 'selecting') $('#factionSelect').classList.add('hidden');
             screen(old);
         } else if (m.type === 'laser') {
             laser(m);
@@ -168,7 +172,8 @@ function screen(old) {
 
     if (state.phase === 'countdown' && old !== 'countdown') {
         debug('COUNTDOWN_START');
-
+        $('#entityGuide').classList.add('hidden');
+        $('#factionSelect').classList.add('hidden');
         s.classList.remove('hidden');
 
         let n = 3;
@@ -194,8 +199,16 @@ function screen(old) {
         };
 
         tick();
+    } else if (state.phase === 'countdown') {
+        $('#entityGuide').classList.add('hidden');
+        s.classList.remove('hidden');
+    } else if (state.phase === 'selecting') {
+        $('#factionSelect').classList.remove('hidden');
+        s.classList.add('hidden');
     } else if (state.phase === 'running') {
         debug('GAME_LOOP_ACTIVE');
+        $('#factionSelect').classList.add('hidden');
+        $('#entityGuide').classList.add('hidden');
         s.classList.add('hidden');
     } else if (state.phase === 'paused') {
         $('#title').textContent = 'PAUSED';
@@ -210,8 +223,12 @@ function screen(old) {
 
         s.classList.remove('hidden');
     } else {
+        selectedFaction = null; factionHover = null; factionHoverSince = 0; factionSelectionLocked = false;
+        bladeColor = '#9dfff0';
+        $('#factionSelect').classList.add('hidden');
+        $('#entityGuide').classList.remove('hidden');
         $('#title').textContent = 'READY TO SLASH?';
-        $('#subtitle').textContent = 'Awaiting admin start signal';
+        $('#subtitle').textContent = 'Waiting for Admin Signal';
 
         s.classList.remove('hidden');
 
@@ -262,6 +279,7 @@ function endGame(reason) {
         difficulty: state.difficulty,
         duration: state.duration,
         timeLeft: state.timeLeft,
+        faction: selectedFaction,
         gameEndReason: reason
     }));
 
@@ -269,6 +287,25 @@ function endGame(reason) {
 }
 
 function laser(m) {
+    if (state.phase === 'selecting' && !factionSelectionLocked && !gameEnded) {
+        factionLastLaserAt = performance.now();
+        if (!m.detected || !Number.isFinite(m.x) || !Number.isFinite(m.y) || m.x < 0 || m.x > 1 || m.y < 0 || m.y > 1) {
+            resetFactionHover();
+            return;
+        }
+        const x = m.x * cv.width, y = m.y * cv.height;
+        const candidate = Object.entries(FACTIONS).find(([id, f]) =>
+            Math.abs(x - f.x * cv.width) <= cv.width * 0.105 &&
+            Math.abs(y - f.y * cv.height) <= cv.height * 0.17
+        );
+        if (!candidate) { resetFactionHover(); return; }
+        if (factionHover !== candidate[0]) {
+            resetFactionHover();
+            factionHover = candidate[0];
+            factionHoverSince = performance.now();
+        }
+        return;
+    }
     if (gameEnded || state.phase !== 'running') {
         prev = null;
         blade = [];
@@ -312,6 +349,31 @@ function laser(m) {
     });
 
     if (blade.length > 18) blade.shift();
+}
+
+function resetFactionHover() {
+    factionHover = null;
+    factionHoverSince = 0;
+    document.querySelectorAll('.faction-option').forEach(option => {
+        option.classList.remove('confirmed');
+        option.querySelector('.faction-progress i').style.width = '0%';
+    });
+}
+
+function updateFactionSelection(now) {
+    if (state.phase !== 'selecting' || factionSelectionLocked || !factionHover) return;
+    if (now - factionLastLaserAt > 500) { resetFactionHover(); return; }
+    const progress = Math.max(0, Math.min(1, (now - factionHoverSince) / 6000));
+    const option = document.querySelector(`.faction-option[data-faction="${factionHover}"]`);
+    if (option) option.querySelector('.faction-progress i').style.width = `${progress * 100}%`;
+    if (progress >= 1) {
+        selectedFaction = factionHover;
+        factionSelectionLocked = true;
+        bladeColor = FACTIONS[selectedFaction].color;
+        if (option) option.classList.add('confirmed');
+        debug('FACTION_CONFIRMED', selectedFaction);
+        ws?.send(JSON.stringify({ type: 'factionSelected', faction: selectedFaction }));
+    }
 }
 
 function spawn() {
@@ -446,6 +508,7 @@ function draw(o) {
 
 function frame(now) {
     requestAnimationFrame(frame);
+    updateFactionSelection(now);
 
     let dt = Math.min(0.05, (now - last) / 1000);
 
@@ -560,7 +623,7 @@ function frame(now) {
 
         for (let i = 1; i < blade.length; i++) {
             ctx.globalAlpha = i / blade.length;
-            ctx.strokeStyle = '#9dfff0';
+            ctx.strokeStyle = bladeColor;
             ctx.lineWidth = 4 + i * 1.5;
 
             ctx.beginPath();
@@ -595,7 +658,7 @@ function frame(now) {
             const size = sparkle.size;
 
             ctx.globalAlpha = trailOpacity * (sparkle.white ? 0.9 : 0.78);
-            ctx.fillStyle = sparkle.white ? '#ffffff' : '#9dfff0';
+            ctx.fillStyle = sparkle.white ? '#ffffff' : bladeColor;
             ctx.beginPath();
             ctx.moveTo(x, y - size);
             ctx.lineTo(x + size * 0.48, y);
