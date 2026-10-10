@@ -6,6 +6,120 @@ const ctx = cv.getContext('2d');
 const $ = s => document.querySelector(s);
 
 const entityImages = new Map();
+const hitEffectAssets = {};
+const effectCategories = ['hit', 'bonus', 'penalty'];
+const AUDIO_POOL_SIZE = 4;
+let audioUnlocked = false;
+let audioPoolCursor = new WeakMap();
+
+function createAudioPool(src, size = AUDIO_POOL_SIZE) {
+    return Array.from({ length: size }, () => {
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.src = src;
+        audio.load();
+        audio.addEventListener('error', () => {
+            console.warn('[Defense of Hogwarts] Audio asset failed to load:', src, audio.error);
+        });
+        return audio;
+    });
+}
+
+for (const category of effectCategories) {
+    const visual = new Image();
+    visual.src = `/assets/effects/${category}/visual.png`;
+    const scoreImage = new Image();
+    scoreImage.src = `/assets/effects/${category}/score.png`;
+    hitEffectAssets[category] = {
+        visual,
+        score: scoreImage,
+        audioPool: createAudioPool(`/assets/effects/${category}/sound.ogg`)
+    };
+}
+
+const endingAudio = {
+    TIME: createAudioPool('/assets/effects/ending/success.ogg', 1),
+    LIVES_DEPLETED: createAudioPool('/assets/effects/ending/fail.ogg', 1)
+};
+const bladeImage = new Image();
+bladeImage.src = '/assets/slash/blade.svg';
+
+function allAudioElements() {
+    return [
+        ...effectCategories.flatMap(category => hitEffectAssets[category].audioPool),
+        ...Object.values(endingAudio).flat()
+    ];
+}
+
+// Browsers require a user gesture on the game page before scripted audio can play.
+// Prime every reusable audio element from the explicit Enable Sound button.
+async function unlockAudio() {
+    const button = $('#enableAudio');
+    const audios = allAudioElements();
+    if (!audios.length) return;
+
+    button.disabled = true;
+    button.textContent = 'Enabling sound…';
+
+    const results = await Promise.all(audios.map(async audio => {
+        audio.muted = true;
+        audio.currentTime = 0;
+        try {
+            await audio.play();
+            audio.pause();
+            audio.currentTime = 0;
+            audio.muted = false;
+            return true;
+        } catch (error) {
+            audio.pause();
+            audio.muted = false;
+            console.warn('[Defense of Hogwarts] Could not unlock audio resource:', audio.currentSrc || audio.src, error.name, error.message);
+            return false;
+        }
+    }));
+
+    // One missing/corrupt file must not prevent the other sound effects from working.
+    audioUnlocked = results.some(Boolean);
+    if (audioUnlocked) {
+        button.textContent = 'Sound Enabled';
+        button.classList.add('enabled');
+        debug('AUDIO_UNLOCKED', results.filter(Boolean).length, 'of', results.length, 'audio resources');
+    } else {
+        button.disabled = false;
+        button.textContent = 'Click to Enable Sound';
+        console.warn('[Defense of Hogwarts] No audio resources could be unlocked. Check the browser console and asset requests.');
+    }
+}
+
+function playAudio(pool) {
+    if (!pool || !pool.length) return;
+    if (!audioUnlocked) {
+        debug('AUDIO_SKIPPED_NOT_UNLOCKED');
+        return;
+    }
+
+    // Reuse preloaded elements instead of cloning an element whose media data may not
+    // be ready. A small pool allows rapid hits to overlap without restarting each other.
+    const cursor = audioPoolCursor.get(pool) || 0;
+    const audio = pool[cursor % pool.length];
+    audioPoolCursor.set(pool, (cursor + 1) % pool.length);
+
+    try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+        const result = audio.play();
+        if (result && typeof result.catch === 'function') {
+            result.catch(error => {
+                console.warn('[Defense of Hogwarts] Audio playback failed:', audio.currentSrc || audio.src, error.name, error.message);
+            });
+        }
+    } catch (error) {
+        console.warn('[Defense of Hogwarts] Audio playback failed:', audio.currentSrc || audio.src, error);
+    }
+}
+
+$('#enableAudio')?.addEventListener('click', unlockAudio);
 
 [...CONFIG.ENTITIES, CONFIG.SPECIAL_ENTITY, CONFIG.PENALTY_ENTITY].forEach(entity => {
     const image = new Image();
@@ -116,11 +230,13 @@ function endGame(reason) {
     if (gameEnded) return;
 
     gameEnded = true;
+    if (reason === 'TIME' || reason === 'LIVES_DEPLETED') playAudio(endingAudio[reason]);
 
     clearTimeout(countdownTimer);
     countdownTimer = null;
 
     prev = null;
+    blade = [];
 
     state = {
         ...state,
@@ -153,11 +269,13 @@ function endGame(reason) {
 function laser(m) {
     if (gameEnded || state.phase !== 'running') {
         prev = null;
+        blade = [];
         return;
     }
 
     if (!m.detected) {
         prev = null;
+        blade = [];
         return;
     }
 
@@ -169,7 +287,8 @@ function laser(m) {
     if (prev && state.phase === 'running') {
         objects.forEach(o => {
             if (!o.dead && segmentCircle(prev, p, o, o.r)) {
-                hit(o);
+                // Register at most once and preserve the collision target position before removal.
+                hit(o, { x: o.x, y: o.y });
             }
         });
     }
@@ -248,38 +367,32 @@ function spawn() {
     );
 }
 
-function hit(o) {
+function hit(o, hitPosition = { x: o.x, y: o.y }) {
     if (gameEnded || state.phase !== 'running' || o.dead) return;
 
+    // Mark dead before scoring/effects so overlapping laser segments cannot double-register.
     o.dead = true;
+    const category = o.type === 'bomb' ? 'penalty' : o.type === 'star' ? 'bonus' : 'hit';
+    const assets = hitEffectAssets[category];
 
     if (o.type === 'bomb') {
         score = Math.max(0, score + CONFIG.SCORES.bomb);
         lives--;
         bombs++;
-
-        effects.push({
-            x: o.x,
-            y: o.y,
-            color: '#ff7058',
-            until: clock + 650,
-            boom: true
-        });
     } else {
-        score += o.type === 'star'
-            ? CONFIG.SCORES.star
-            : CONFIG.SCORES.fruit;
-
-        effects.push({
-            x: o.x,
-            y: o.y,
-            color: o.type === 'star'
-                ? '#ffe568'
-                : o.color,
-            until: clock + 2300,
-            boom: false
-        });
+        score += o.type === 'star' ? CONFIG.SCORES.star : CONFIG.SCORES.fruit;
     }
+
+    // Effects are advanced by rendered frames, not wall-clock time.
+    effects.push({
+        category,
+        x: hitPosition.x,
+        y: hitPosition.y,
+        visual: assets.visual,
+        scoreImage: assets.score,
+        frame: 0
+    });
+    playAudio(assets.audioPool);
 
     if (lives <= 0) endGame('LIVES_DEPLETED');
 }
@@ -386,30 +499,48 @@ function frame(now) {
         firstRunningFrame = true;
     }
 
-    effects = effects.filter(e => e.until > clock);
-
+    effects = effects.filter(e => e.frame < 6);
     effects.forEach(e => {
-        let total = e.boom ? 650 : 2300;
-        let a = (e.until - clock) / total;
+        const opacity = [1, 0.8, 0.6, 0.4, 0.2, 0][e.frame];
+        const visual = e.visual;
+        const scoreImage = e.scoreImage;
+        const visualSize = Math.min(150, Math.max(90, cv.width * 0.11));
+        const visualAspect = visual?.naturalWidth > 0 && visual?.naturalHeight > 0
+            ? visual.naturalWidth / visual.naturalHeight : 1;
+        const visualW = visualSize;
+        const visualH = visualSize / visualAspect;
+        const scoreW = Math.min(100, Math.max(64, cv.width * 0.075));
+        const scoreAspect = scoreImage?.naturalWidth > 0 && scoreImage?.naturalHeight > 0
+            ? scoreImage.naturalWidth / scoreImage.naturalHeight : 1;
+        const scoreWActual = scoreW;
+        const scoreH = scoreW / scoreAspect;
+        const gap = 8;
+        let visualX = e.x - visualW / 2;
+        let visualY = e.y - visualH / 2;
+        let scoreX = e.x + visualW / 2 + gap;
+        let scoreY = e.y - scoreH / 2;
+        // Keep the paired graphics near the hit while avoiding unnecessary screen-edge clipping.
+        if (scoreX + scoreWActual > cv.width - 6) {
+            scoreX = e.x - visualW / 2 - gap - scoreWActual;
+        }
+        visualX = Math.max(0, Math.min(cv.width - visualW, visualX));
+        visualY = Math.max(0, Math.min(cv.height - visualH, visualY));
+        scoreX = Math.max(0, Math.min(cv.width - scoreWActual, scoreX));
+        scoreY = Math.max(0, Math.min(cv.height - scoreH, scoreY));
 
-        ctx.globalAlpha = a;
-        ctx.strokeStyle = e.color;
-        ctx.lineWidth = e.boom ? 10 : 5;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            e.x,
-            e.y,
-            (1 - a) * (e.boom ? 100 : 75) + 20,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.stroke();
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        if (visual?.complete && visual.naturalWidth > 0) {
+            ctx.drawImage(visual, visualX, visualY, visualW, visualH);
+        }
+        if (scoreImage?.complete && scoreImage.naturalWidth > 0) {
+            ctx.drawImage(scoreImage, scoreX, scoreY, scoreWActual, scoreH);
+        }
+        ctx.restore();
+        e.frame++;
     });
-
-    ctx.globalAlpha = 1;
+    // Remove immediately after the sixth render, including the zero-opacity frame.
+    effects = effects.filter(e => e.frame < 6);
 
     if (blade.length > 1) {
         ctx.lineCap = 'round';
@@ -432,6 +563,22 @@ function frame(now) {
         }
 
         ctx.globalAlpha = 1;
+    }
+
+    // The current slash SVG is drawn at the latest tracked game-space point.
+    // The existing trail and tracking coordinates remain unchanged.
+    if (blade.length && state.phase === 'running' && !gameEnded && bladeImage.complete && bladeImage.naturalWidth > 0) {
+        const tip = blade[blade.length - 1];
+        const prior = blade.length > 1 ? blade[blade.length - 2] : tip;
+        const angle = Math.atan2(tip.y - prior.y, tip.x - prior.x);
+        ctx.save();
+        ctx.translate(tip.x, tip.y);
+        ctx.rotate(angle);
+        ctx.globalAlpha = 0.9;
+        const bladeWidth = 104;
+        const bladeHeight = bladeWidth * bladeImage.naturalHeight / bladeImage.naturalWidth;
+        ctx.drawImage(bladeImage, -bladeWidth / 2, -bladeHeight / 2, bladeWidth, bladeHeight);
+        ctx.restore();
     }
 
     $('#score').textContent = score.toLocaleString();

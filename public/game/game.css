@@ -87,3 +87,28 @@ body {
     color: #E8DCC4;
     text-shadow: 0 2px 5px #090B18;
 }
+
+
+/* Audio must be unlocked by a user gesture on the game page itself. */
+#enableAudio {
+    position: fixed;
+    z-index: 20;
+    right: clamp(12px, 2vw, 28px);
+    bottom: clamp(12px, 2vw, 28px);
+    padding: 10px 16px;
+    border: 1px solid #FFD966;
+    border-radius: 999px;
+    background: #10162de8;
+    color: #FFE08A;
+    font: 700 clamp(12px, 1.2vw, 17px)/1.2 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 2px 12px #0008;
+}
+#enableAudio:disabled {
+    cursor: wait;
+    opacity: .85;
+}
+#enableAudio.enabled {
+    border-color: #8fd8ff;
+    color: #8fd8ff;
+}
