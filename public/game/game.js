@@ -41,8 +41,8 @@ const endingAudio = {
     TIME: createAudioPool('/assets/effects/ending/success.ogg', 1),
     LIVES_DEPLETED: createAudioPool('/assets/effects/ending/fail.ogg', 1)
 };
-const bladeImage = new Image();
-bladeImage.src = '/assets/slash/blade.svg';
+const EFFECT_LIFETIME_MS = 2000;
+const EFFECT_FADE_START_MS = 1500;
 
 function allAudioElements() {
     return [
@@ -127,7 +127,7 @@ $('#enableAudio')?.addEventListener('click', unlockAudio);
     entityImages.set(entity.name, image);
 });
 
-let ws, state = { phase: 'idle', timeLeft: 150 }, objects = [], effects = [], blade = [], prev = null, score = 0, lives = 3, bombs = 0, last = performance.now(), clock = 0, nextSpawn = 0, lastReport = 0, firstRunningFrame = true, gameEnded = false, countdownTimer = null;
+let ws, state = { phase: 'idle', timeLeft: 150 }, objects = [], effects = [], blade = [], bladePointCount = 0, prev = null, score = 0, lives = 3, bombs = 0, last = performance.now(), clock = 0, nextSpawn = 0, lastReport = 0, firstRunningFrame = true, gameEnded = false, countdownTimer = null;
 
 const debug = (...details) => {
     if (CONFIG.DEBUG) console.debug('[Defense of Hogwarts]', ...details);
@@ -218,6 +218,7 @@ function screen(old) {
         objects = [];
         effects = [];
         blade = [];
+        bladePointCount = 0;
         prev = null;
         score = 0;
         lives = 3;
@@ -237,6 +238,7 @@ function endGame(reason) {
 
     prev = null;
     blade = [];
+    bladePointCount = 0;
 
     state = {
         ...state,
@@ -270,12 +272,14 @@ function laser(m) {
     if (gameEnded || state.phase !== 'running') {
         prev = null;
         blade = [];
+        bladePointCount = 0;
         return;
     }
 
     if (!m.detected) {
         prev = null;
         blade = [];
+        bladePointCount = 0;
         return;
     }
 
@@ -297,7 +301,14 @@ function laser(m) {
 
     blade.push({
         ...p,
-        at: clock
+        at: clock,
+        // Assign sparkle metadata once per trail point so its position never jitters per frame.
+        sparkle: bladePointCount++ % 3 === 0 ? {
+            offsetX: (Math.random() - 0.5) * 10,
+            offsetY: (Math.random() - 0.5) * 10,
+            size: 2 + Math.random() * 3,
+            white: Math.random() < 0.16
+        } : null
     });
 
     if (blade.length > 18) blade.shift();
@@ -383,14 +394,15 @@ function hit(o, hitPosition = { x: o.x, y: o.y }) {
         score += o.type === 'star' ? CONFIG.SCORES.star : CONFIG.SCORES.fruit;
     }
 
-    // Effects are advanced by rendered frames, not wall-clock time.
+    // Use elapsed time so effects remain readable across different frame rates.
     effects.push({
         category,
         x: hitPosition.x,
         y: hitPosition.y,
         visual: assets.visual,
         scoreImage: assets.score,
-        frame: 0
+        createdAt: performance.now(),
+        duration: EFFECT_LIFETIME_MS
     });
     playAudio(assets.audioPool);
 
@@ -499,17 +511,21 @@ function frame(now) {
         firstRunningFrame = true;
     }
 
-    effects = effects.filter(e => e.frame < 6);
+    effects = effects.filter(e => now - e.createdAt < e.duration);
     effects.forEach(e => {
-        const opacity = [1, 0.8, 0.6, 0.4, 0.2, 0][e.frame];
+        const elapsed = Math.max(0, now - e.createdAt);
+        const fadeProgress = Math.max(0, Math.min(1,
+            (elapsed - EFFECT_FADE_START_MS) / (e.duration - EFFECT_FADE_START_MS)
+        ));
+        const opacity = 1 - fadeProgress;
         const visual = e.visual;
         const scoreImage = e.scoreImage;
-        const visualSize = Math.min(150, Math.max(90, cv.width * 0.11));
+        const visualSize = Math.min(220, Math.max(140, cv.width * 0.11));
         const visualAspect = visual?.naturalWidth > 0 && visual?.naturalHeight > 0
             ? visual.naturalWidth / visual.naturalHeight : 1;
         const visualW = visualSize;
         const visualH = visualSize / visualAspect;
-        const scoreW = Math.min(100, Math.max(64, cv.width * 0.075));
+        const scoreW = Math.min(140, Math.max(90, cv.width * 0.075));
         const scoreAspect = scoreImage?.naturalWidth > 0 && scoreImage?.naturalHeight > 0
             ? scoreImage.naturalWidth / scoreImage.naturalHeight : 1;
         const scoreWActual = scoreW;
@@ -537,10 +553,7 @@ function frame(now) {
             ctx.drawImage(scoreImage, scoreX, scoreY, scoreWActual, scoreH);
         }
         ctx.restore();
-        e.frame++;
     });
-    // Remove immediately after the sixth render, including the zero-opacity frame.
-    effects = effects.filter(e => e.frame < 6);
 
     if (blade.length > 1) {
         ctx.lineCap = 'round';
@@ -565,19 +578,32 @@ function frame(now) {
         ctx.globalAlpha = 1;
     }
 
-    // The current slash SVG is drawn at the latest tracked game-space point.
-    // The existing trail and tracking coordinates remain unchanged.
-    if (blade.length && state.phase === 'running' && !gameEnded && bladeImage.complete && bladeImage.naturalWidth > 0) {
-        const tip = blade[blade.length - 1];
-        const prior = blade.length > 1 ? blade[blade.length - 2] : tip;
-        const angle = Math.atan2(tip.y - prior.y, tip.x - prior.x);
+    // Small four-pointed sparkles are anchored to trail points and fade with them.
+    // save/restore isolates sparkle styling from the rest of the Canvas renderer.
+    if (blade.length > 1 && state.phase === 'running' && !gameEnded) {
         ctx.save();
-        ctx.translate(tip.x, tip.y);
-        ctx.rotate(angle);
-        ctx.globalAlpha = 0.9;
-        const bladeWidth = 104;
-        const bladeHeight = bladeWidth * bladeImage.naturalHeight / bladeImage.naturalWidth;
-        ctx.drawImage(bladeImage, -bladeWidth / 2, -bladeHeight / 2, bladeWidth, bladeHeight);
+        for (let i = 0; i < blade.length; i++) {
+            const point = blade[i];
+            if (!point.sparkle) continue;
+
+            const trailOpacity = i / blade.length;
+            if (trailOpacity <= 0) continue;
+
+            const sparkle = point.sparkle;
+            const x = point.x + sparkle.offsetX;
+            const y = point.y + sparkle.offsetY;
+            const size = sparkle.size;
+
+            ctx.globalAlpha = trailOpacity * (sparkle.white ? 0.9 : 0.78);
+            ctx.fillStyle = sparkle.white ? '#ffffff' : '#9dfff0';
+            ctx.beginPath();
+            ctx.moveTo(x, y - size);
+            ctx.lineTo(x + size * 0.48, y);
+            ctx.lineTo(x, y + size);
+            ctx.lineTo(x - size * 0.48, y);
+            ctx.closePath();
+            ctx.fill();
+        }
         ctx.restore();
     }
 
